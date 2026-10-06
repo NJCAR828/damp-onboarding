@@ -1,0 +1,1037 @@
+<!-- DAMP Lab Onboarding v1.6 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DAMP Lab — Member Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --border: #e2e5eb;
+  --text: #1a1d23;
+  --text-secondary: #5a6070;
+  --text-muted: #8a93a6;
+  --accent: #E04162;
+  --accent-light: #fdf0f3;
+  --accent-border: #f5b8c4;
+  --blue: #90B4BA;
+  --blue-light: #f0f6f7;
+  --blue-border: #c5dde0;
+  --green: #16a34a;
+  --green-light: #f0fdf4;
+  --green-border: #bbf7d0;
+  --amber: #d97706;
+  --amber-light: #fffbeb;
+  --amber-border: #fde68a;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --red-border: #fecaca;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+  --radius: 8px;
+  --radius-lg: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111318; --surface: #1c1f27; --border: #2a2e3a;
+    --text: #e8eaf0; --text-secondary: #9099b0; --text-muted: #5a6070;
+    --accent: #E04162; --accent-light: #2a1019; --accent-border: #6b1d2d;
+    --blue: #90B4BA; --blue-light: #0d1f22; --blue-border: #2a4d52;
+    --green: #22c55e; --green-light: #0d2018; --green-border: #14532d;
+    --amber: #fbbf24; --amber-light: #1c1500; --amber-border: #78350f;
+    --red: #f87171; --red-light: #1c0a0a; --red-border: #7f1d1d;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; padding-bottom: 80px; }
+
+/* Header */
+.site-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; position: sticky; top: 0; z-index: 100; }
+.logo { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--accent); letter-spacing: 0.04em; }
+.semester-badge { font-size: 12px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; font-family: var(--mono); }
+
+/* Layout */
+.layout { display: grid; grid-template-columns: 220px 1fr; max-width: 1100px; margin: 0 auto; padding: 32px 24px 0; gap: 32px; align-items: start; }
+@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+
+/* Sidebar */
+.sidebar { position: sticky; top: 88px; }
+.sidebar-nav { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.sidebar-nav a { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.15s; cursor: pointer; }
+.sidebar-nav a:hover { background: var(--border); color: var(--text); }
+.sidebar-nav a.active { background: var(--accent-light); color: var(--accent); }
+.sidebar-section { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 16px 10px 6px; }
+
+/* Main */
+.main { min-width: 0; }
+.page-title { font-size: 26px; font-weight: 600; margin-bottom: 6px; line-height: 1.25; }
+.page-sub { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+.section { margin-bottom: 40px; scroll-margin-top: 80px; }
+.section-title { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 12px; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.card-body { color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+
+/* Info blocks */
+.info-block { border-left: 3px solid var(--blue); background: var(--blue-light); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 14px; }
+.info-block p { font-size: 13px; color: var(--text-secondary); }
+.info-block strong { color: var(--text); }
+.warn-block { border-left: 3px solid var(--accent); background: var(--accent-light); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 14px; }
+.warn-block p { font-size: 13px; color: var(--text-secondary); }
+
+/* Progress */
+.progress-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+.progress-bar-bg { flex: 1; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width 0.4s ease; }
+.progress-label { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+
+/* Tasks */
+.task-list { display: flex; flex-direction: column; gap: 6px; }
+.task-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
+.task-item.done { background: var(--green-light); border-color: var(--green-border); }
+.task-item.nodot { opacity: 0.7; }
+.task-check { width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.task-item.done .task-check { background: var(--green); border-color: var(--green); }
+.task-check svg { display: none; }
+.task-item.done .task-check svg { display: block; }
+.task-num { font-family: var(--mono); font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+.task-name { font-size: 13px; font-weight: 500; flex: 1; }
+.task-item.done .task-name { color: var(--green); }
+.task-time { font-family: var(--mono); font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+/* Section complete button */
+.section-complete { display: flex; align-items: center; justify-content: flex-end; margin-top: 12px; gap: 10px; }
+.section-complete-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-secondary); font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.section-complete-btn:hover { border-color: var(--accent-border); color: var(--accent); }
+.section-complete-btn.done { background: var(--green-light); border-color: var(--green-border); color: var(--green); cursor: default; }
+.section-complete-btn .btn-check { width: 16px; height: 16px; border: 2px solid currentColor; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-complete-btn.done .btn-check { background: var(--green); border-color: var(--green); }
+
+/* Buttons */
+.btn { font-family: var(--sans); font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+.btn:hover { border-color: var(--accent-border); color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { opacity: 0.88; }
+.btn.secondary { background: var(--blue); color: #fff; border-color: var(--blue); }
+.btn.secondary:hover { opacity: 0.88; }
+.btn.success { background: var(--green); color: #fff; border-color: var(--green); }
+.btn.danger { background: var(--red-light); color: var(--red); border-color: var(--red-border); }
+
+/* Tracker */
+.tracker-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 24px; }
+.tracker-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+.tracker-title { font-size: 14px; font-weight: 600; }
+.tracker-table { width: 100%; border-collapse: collapse; }
+.tracker-table th { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--bg); }
+.tracker-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+.tracker-table tr:last-child td { border-bottom: none; }
+.tracker-table tbody tr:hover { background: var(--bg); }
+.member-name { font-weight: 500; }
+.member-meta { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+.dot { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; }
+.dot.done { background: var(--green-light); color: var(--green); border: 1.5px solid var(--green-border); }
+.dot.pending-dot { background: var(--bg); border: 1.5px solid var(--border); }
+.tasks-dots { display: flex; gap: 4px; }
+.status-pill { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; display: inline-block; }
+.status-pill.complete { background: var(--green-light); color: var(--green); }
+.status-pill.inprogress { background: var(--blue-light); color: var(--blue); }
+.status-pill.notstarted { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+/* Forms */
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; max-width: 620px; }
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 13px; font-weight: 500; margin-bottom: 6px; display: block; }
+.form-label span { color: var(--text-muted); font-weight: 400; }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; outline: none; transition: border-color 0.15s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+.form-error { font-size: 12px; color: var(--red); margin-top: 4px; display: none; }
+.form-error.show { display: block; }
+.rank-group { display: flex; flex-direction: column; gap: 8px; }
+.rank-item { display: flex; align-items: center; gap: 10px; }
+.rank-num { font-family: var(--mono); font-size: 12px; color: var(--text-muted); width: 20px; flex-shrink: 0; }
+.form-input-inline { padding: 4px 8px; font-size: 12px; width: 130px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: var(--sans); outline: none; }
+
+/* Success / Gate */
+.success-state { text-align: center; padding: 60px 32px; }
+.success-icon { width: 56px; height: 56px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 2px solid var(--green-border); }
+.success-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.success-sub { color: var(--text-secondary); font-size: 14px; }
+.gate { max-width: 540px; margin: 60px auto; text-align: center; padding: 0 24px; }
+.gate-emoji { font-size: 40px; margin-bottom: 20px; }
+.gate-title { font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+.gate-sub { color: var(--text-secondary); font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+.code-block { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: var(--mono); font-size: 12px; color: var(--text-secondary); line-height: 1.8; }
+.loading { color: var(--text-muted); font-size: 13px; padding: 32px; text-align: center; }
+
+/* Accent bar on cards */
+.card.accent-bar { border-left: 3px solid var(--accent); }
+.card.blue-bar { border-left: 3px solid var(--blue); }
+
+/* Project tag */
+.skill-tag { display: inline-block; font-size: 11px; font-family: var(--mono); padding: 2px 8px; border-radius: 20px; background: var(--blue-light); color: var(--blue); border: 1px solid var(--blue-border); margin: 2px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="#" onclick="location.reload()" style="display:flex;align-items:center;text-decoration:none;">
+    <img src="logo.png" alt="DAMP Lab" style="height:44px;width:auto;object-fit:contain;" onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'">
+    <span id="logo-fallback" style="display:none;font-family:var(--mono);font-size:14px;font-weight:500;color:var(--accent);letter-spacing:0.04em;">DAMP Lab</span>
+  </a>
+
+</header>
+
+<div id="root"><div class="loading">Loading...</div></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, where } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ════════════════════════════════════════════════════════
+//  ✏️  EDITABLE CONFIG — change all text here
+// ════════════════════════════════════════════════════════
+const CONFIG = {
+
+  // ── Branding ──────────────────────────────────────────
+  labName: 'DAMP Lab',
+  semester: 'Fall 26',
+  onboardingUrl: 'https://NJCAR828.github.io/damp-onboarding',
+  leadPassword: 'damplab2026',
+
+  // ── Interest form page ────────────────────────────────
+  form: {
+    pageTitle: 'Join the DAMP Lab Colonies Program',
+    pageSubtitle: 'Tell us about yourself and what you\'d like to work on. Once reviewed you\'ll get access to the full onboarding portal.',
+    labelFirstName: 'First name',
+    labelLastName: 'Last name',
+    labelEmail: 'Email',
+    labelYear: 'Year',
+    labelMajor: 'Major',
+    labelSkills: 'Relevant skills or experience',
+    labelSkillsHint: 'brief — 1 to 2 sentences',
+    labelSkillsPlaceholder: 'e.g. Python, React, some lab experience from BIO 201...',
+    labelRanking: 'Project interest ranking',
+    labelFocus: 'Focus preference',
+    focusOptionDeep: 'Go deep — one project, full commitment',
+    focusOptionBroad: 'Explore broadly — see where I can help',
+    focusOptionUnsure: 'Not sure yet',
+    labelNotes: 'Anything else we should know?',
+    labelNotesHint: 'optional',
+    labelNotesPlaceholder: 'Scheduling constraints, prior context, questions...',
+    submitButton: 'Submit application',
+  },
+
+  // ── Post-submit confirmation ──────────────────────────
+  submitted: {
+    title: 'Application submitted',
+    message: 'You\'re on the list. The lab lead will review your application and you\'ll get access once approved. Bookmark this page and check back.',
+  },
+
+  // ── Pending gate (waiting for approval) ──────────────
+  pending: {
+    title: 'Application received',
+    message: 'Your interest form has been submitted. The lab lead will review applications and you\'ll get access to the onboarding materials once approved. Bookmark this page and check back — no email needed.',
+  },
+
+  // ── Onboarding page ───────────────────────────────────
+  onboarding: {
+    welcomeTitle: 'Welcome to the DAMP Lab Colonies Program', // first name is appended automatically
+    welcomeSubtitle: 'Complete the tasks below before our first meeting (01/XX/XX).',
+    progressLabel: 'complete',
+  },
+
+  // ── Tasks ─────────────────────────────────────────────
+  tasks: [
+    {
+      id: 't1',
+      name: 'Read: Who we are',
+      desc: 'Mission, values, and what this semester looks like.',
+      time: '5 min',
+    },
+    {
+      id: 't2',
+      name: 'Read: What everyone should know',
+      desc: 'Key information every lab member needs before starting.',
+      time: 'TBD',
+    },
+    {
+      id: 't3',
+      name: 'Browse: Project directory',
+      desc: 'Read every active project before choosing.',
+      time: '10 min',
+    },
+    {
+      id: 't4',
+      name: 'Submit: Interest form',
+      desc: 'Already done — you submitted this to get here.',
+      time: 'done',
+      locked: true,
+    },
+    {
+      id: 't5',
+      name: 'Read: How we communicate',
+      desc: 'Tools, norms, and who to contact for what.',
+      time: '5 min',
+    },
+  ],
+
+  // ── Who we are section ────────────────────────────────
+  whoWeAre: {
+    sectionTitle: 'Who we are',
+    cardTitle: 'About DAMP Lab',
+    paragraph1: 'DAMP Lab is a student-led research and build group focused on [your mission here]. Each semester we take on a cohort of 10–20 undergraduates who contribute to active projects or propose their own.',
+    paragraph2: 'We work at the intersection of research and engineering — that means you\'ll write code, run experiments, and ship things that matter. Past cohort members have [highlight: published, presented at X, built Y].',
+    paragraph3: 'What to expect this semester: You\'ll find or create a project in week one, make your first contribution by week two, and have a defined role by week three.',
+  },
+
+  // ── What everyone should know section ────────────────
+  general: {
+    sectionTitle: 'What everyone should know',
+    infoText: 'This section covers the essentials every lab member needs before starting — regardless of project.',
+    items: [
+      {
+        title: '[Topic 1]',
+        body: '[Content coming after director meeting — add key info here.]',
+      },
+      {
+        title: '[Topic 2]',
+        body: '[Content coming after director meeting — add key info here.]',
+      },
+      {
+        title: '[Topic 3]',
+        body: '[Content coming after director meeting — add key info here.]',
+      },
+    ],
+  },
+
+  // ── Projects section ──────────────────────────────────
+  projectsSection: {
+    sectionTitle: 'Active projects',
+    infoText: 'Your placement is based on your interest form. Your lead will reach out once assigned.',
+    proposeTitle: 'Propose your own project',
+    proposeBody: 'Have an idea that fits the lab\'s mission? Talk to [lead name] or fill out the proposal form: [link].',
+  },
+
+  // ── Projects list (also used in interest form dropdown) ──
+  projects: [
+    {
+      id: 'pa',
+      name: 'Project A',
+      description: '[One paragraph: what problem it solves, current status, what a new contributor works on first.]',
+      skills: ['Python', 'Data analysis'],
+      spots: 2,
+    },
+    {
+      id: 'pb',
+      name: 'Project B',
+      description: '[One paragraph: what problem it solves, current status, what a new contributor works on first.]',
+      skills: ['Systems design', 'Backend'],
+      spots: 3,
+    },
+    {
+      id: 'pc',
+      name: 'Project C',
+      description: '[One paragraph: what problem it solves, current status, what a new contributor works on first.]',
+      skills: ['Frontend', 'UX'],
+      spots: 2,
+    },
+    {
+      id: 'own',
+      name: 'Propose my own project',
+      description: '',
+      skills: [],
+      spots: 99,
+      propose: true,
+    },
+  ],
+
+  // ── How we communicate section ────────────────────────
+  comms: {
+    sectionTitle: 'How we communicate',
+    toolsTitle: 'Tools and cadence',
+    dayToDay: '[Tool — e.g. Slack] — expected response within 24 hours on weekdays.',
+    weeklyMeeting: '[Day, time, location or link]. Attendance expected unless flagged in advance.',
+    projectWork: 'Tracked in [Notion / GitHub]. Your project lead will walk you through it on day one.',
+    contactTitle: 'Who to contact',
+    contacts: [
+      { role: 'General questions', name: '[Name]', contact: '[email or Slack]' },
+      { role: 'Canvas / technical issues', name: '[Name]', contact: '[email or Slack]' },
+      { role: 'Project placement', name: '[Name]', contact: '[email or Slack]' },
+    ],
+    stuckMessage: 'Stuck for more than an hour? Ask. Don\'t spiral.',
+  },
+
+  // ── Lead dashboard ────────────────────────────────────
+  lead: {
+    dashboardTitle: 'Cohort tracker',
+    loginTitle: 'Lead login',
+    loginSubtitle: 'Enter your lead password to access the admin dashboard.',
+    loginPlaceholder: 'Password',
+    loginButton: 'Sign in',
+    loginError: 'Incorrect password',
+    approveButton: 'Approve',
+    declineButton: 'Decline',
+    exportButton: 'Export CSV',
+    assignPlaceholder: 'Project name',
+    assignButton: 'Save',
+  },
+
+};
+// ════════════════════════════════════════════════════════
+//  END OF EDITABLE CONFIG
+// ════════════════════════════════════════════════════════
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBvZf_q21bXUXx3z4tXFo-nu8iseKkVMbI",
+  authDomain: "damp-lab-colonies-onboarding.firebaseapp.com",
+  projectId: "damp-lab-colonies-onboarding",
+  storageBucket: "damp-lab-colonies-onboarding.firebasestorage.app",
+  messagingSenderId: "592648927607",
+  appId: "1:592648927607:web:f8f04fc7fce5f33a9e4972"
+};
+
+// EmailJS config
+const EMAILJS = {
+  publicKey: 'tEmnA41ZLD2LfuH4n',
+  serviceId: 'service_DAMP',
+  templateId: 'template_vxpu9co',
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+emailjs.init(EMAILJS.publicKey);
+
+// Set header
+// logo is a static image
+
+
+// State
+let sessionEmail = localStorage.getItem('damp_email') || null;
+let sessionRole = localStorage.getItem('damp_role') || null;
+let myRecord = null;
+let myTasks = {};
+let allMembers = [];
+let leadTab = 'pending';
+
+await init();
+
+async function init() {
+  if (sessionRole === 'lead') { renderLeadView(); return; }
+  if (sessionEmail) {
+    const found = await findMemberByEmail(sessionEmail);
+    if (found) {
+      myRecord = found;
+      if (found.status === 'approved') {
+        myTasks = found.tasks || {};
+        renderOnboarding();
+      } else {
+        renderPendingGate();
+      }
+      return;
+    }
+  }
+  renderInterestForm();
+}
+
+async function findMemberByEmail(email) {
+  const q = query(collection(db, 'members'), where('email', '==', email));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  return { id: snap.docs[0].id, ...snap.docs[0].data() };
+}
+
+// ── INTEREST FORM ─────────────────────────────────────────────────────────────
+function renderInterestForm() {
+  const C = CONFIG.form;
+  const projectOptions = CONFIG.projects.map(p =>
+    `<option value="${p.id}">${p.name}</option>`).join('');
+
+  document.getElementById('root').innerHTML = `
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">Getting started</div>
+        <ul class="sidebar-nav">
+          <li><a class="active">Interest form</a></li>
+        </ul>
+        <div class="sidebar-section">Admin</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="showLeadLogin()">Lead login</a></li>
+        </ul>
+      </aside>
+      <main class="main">
+        <div class="page-title">${C.pageTitle}</div>
+        <div class="page-sub">${C.pageSubtitle}</div>
+        <div class="info-block" style="max-width:620px;margin-bottom:16px;">
+          <p>Already applied? <strong><a href="#" onclick="showLookup()" style="color:var(--accent);text-decoration:none;">Sign in →</a></strong></p>
+        </div>
+        <div id="lookup-card" style="display:none;max-width:620px;" class="form-card">
+          <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Check application status</div>
+          <div class="form-group">
+            <label class="form-label">Enter your school email</label>
+            <input class="form-input" id="lookup-email" type="email" placeholder="colony@university.edu" onkeydown="if(event.key==='Enter')lookupEmail()">
+            <div class="form-error" id="lookup-err">No application found for that email.</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn primary" style="flex:1;padding:9px;" onclick="lookupEmail()">Check status</button>
+            <button class="btn" style="flex:1;padding:9px;" onclick="hideLookup()">Cancel</button>
+          </div>
+        </div>
+        <div class="form-card" id="form-card">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name <span style="color:var(--accent)">*</span></label>
+              <input class="form-input" id="f-first" placeholder="Douglas">
+              <div class="form-error" id="e-first">Required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name <span style="color:var(--accent)">*</span></label>
+              <input class="form-input" id="f-last" placeholder="Densmore">
+              <div class="form-error" id="e-last">Required</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">School Email <span style="color:var(--accent)">*</span></label>
+            <input class="form-input" id="f-email" type="email" placeholder="colony@university.edu">
+            <div class="form-error" id="e-email">Enter a valid email</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Grad Year <span style="color:var(--accent)">*</span></label>
+              <select class="form-select" id="f-year">
+                <option value="">Select year</option>
+                <option>2027</option><option>2028</option>
+                <option>2029</option><option>2030</option>
+              </select>
+              <div class="form-error" id="e-year">Required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Major <span style="color:var(--accent)">*</span></label>
+              <input class="form-input" id="f-major" placeholder="Computer Engineering">
+              <div class="form-error" id="e-major">Required</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Have you been in the Colonies Program before? <span style="color:var(--accent)">*</span></label>
+            <div style="display:flex;gap:20px;margin-top:4px;">
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+                <input type="radio" name="returning" value="yes" id="f-returning-yes"> Yes
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;">
+                <input type="radio" name="returning" value="no" id="f-returning-no"> No
+              </label>
+            </div>
+            <div class="form-error" id="e-returning">Required</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Which areas of DAMP Lab interest you most? <span style="color:var(--accent)">*</span> <span style="color:var(--text-muted);font-weight:400;">(select all that apply)</span></label>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+              <label style="display:flex;align-items:flex-start;gap:10px;font-size:14px;cursor:pointer;">
+                <input type="checkbox" value="Robotics" style="margin-top:3px;accent-color:var(--accent);"> 
+                <span><strong>Robotics:</strong> Hands-on testing and programming liquid handling robots in the lab.</span>
+              </label>
+              <label style="display:flex;align-items:flex-start;gap:10px;font-size:14px;cursor:pointer;">
+                <input type="checkbox" value="Protocols" style="margin-top:3px;accent-color:var(--accent);">
+                <span><strong>Protocols:</strong> Drafting and publishing biological protocols utilized by DAMP researchers.</span>
+              </label>
+              <label style="display:flex;align-items:flex-start;gap:10px;font-size:14px;cursor:pointer;">
+                <input type="checkbox" value="Choreography" style="margin-top:3px;accent-color:var(--accent);">
+                <span><strong>Choreography:</strong> Simulating 3D model of lab to optimize its layout and workflow.</span>
+              </label>
+              <label style="display:flex;align-items:flex-start;gap:10px;font-size:14px;cursor:pointer;">
+                <input type="checkbox" value="Interface" style="margin-top:3px;accent-color:var(--accent);">
+                <span><strong>Interface:</strong> Developing full stack architecture for the DAMP Lab Canvas software.</span>
+              </label>
+            </div>
+            <div class="form-error" id="e-areas">Select at least one area</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Do you have any wet lab experience? If so, please elaborate. <span style="color:var(--accent)">*</span></label>
+            <textarea class="form-textarea" id="f-wetlab" placeholder="Your answer"></textarea>
+            <div class="form-error" id="e-wetlab">Required</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Do you have any experience working with molecular biology hardware? If so, please elaborate. <span style="color:var(--accent)">*</span></label>
+            <textarea class="form-textarea" id="f-hardware" placeholder="Your answer"></textarea>
+            <div class="form-error" id="e-hardware">Required</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Do you have experience with software engineering (e.g., building integrations, working with APIs, backend development)? If so, please elaborate. <span style="color:var(--accent)">*</span></label>
+            <textarea class="form-textarea" id="f-software" placeholder="Your answer"></textarea>
+            <div class="form-error" id="e-software">Required</div>
+          </div>
+
+
+
+          <div class="form-group">
+            <label class="form-label">What programming languages do you know? <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;">
+              ${['Python','JavaScript','C/C++','HTML/CSS','MATLAB','Other'].map(lang => `
+              <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;min-width:120px;">
+                <input type="checkbox" value="${lang}" class="lang-check" style="accent-color:var(--accent);"> ${lang}
+              </label>`).join('')}
+            </div>
+          </div>
+
+          <button class="btn primary" style="width:100%;padding:11px;margin-top:8px;" onclick="submitForm()">${C.submitButton}</button>
+        </div>
+      </main>
+    </div>`;
+}
+
+window.showLookup = function() {
+  document.getElementById('lookup-card').style.display = 'block';
+  document.getElementById('form-card').style.display = 'none';
+};
+window.hideLookup = function() {
+  document.getElementById('lookup-card').style.display = 'none';
+  document.getElementById('form-card').style.display = 'block';
+};
+window.lookupEmail = async function() {
+  const email = document.getElementById('lookup-email').value.trim();
+  if (!email || !email.includes('@')) return;
+  const found = await findMemberByEmail(email);
+  if (!found) {
+    document.getElementById('lookup-err').classList.add('show');
+    return;
+  }
+  localStorage.setItem('damp_email', email);
+  sessionEmail = email;
+  myRecord = found;
+  if (found.status === 'approved') {
+    myTasks = found.tasks || {};
+    renderOnboarding();
+  } else {
+    renderPendingGate();
+  }
+};
+
+window.submitForm = async function() {
+  const first = document.getElementById('f-first').value.trim();
+  const last = document.getElementById('f-last').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const year = document.getElementById('f-year').value;
+  const major = document.getElementById('f-major').value.trim();
+  const returning = document.querySelector('input[name="returning"]:checked')?.value || '';
+  const areas = [...document.querySelectorAll('input[type="checkbox"][value]')].filter(c => ['Robotics','Protocols','Choreography','Interface'].includes(c.value) && c.checked).map(c => c.value);
+
+  const wetlab = document.getElementById('f-wetlab').value.trim();
+  const hardware = document.getElementById('f-hardware').value.trim();
+  const software = document.getElementById('f-software').value.trim();
+
+  let valid = true;
+  const chk = (errId, cond, msg) => {
+    const el = document.getElementById(errId);
+    if (!cond) { if(msg) el.textContent = msg; el.classList.add('show'); valid = false; }
+    else el.classList.remove('show');
+  };
+  chk('e-first', first);
+  chk('e-last', last);
+  chk('e-email', email && email.includes('@'));
+  chk('e-year', year);
+  chk('e-major', major);
+  chk('e-returning', returning);
+  chk('e-areas', areas.length > 0);
+  chk('e-wetlab', wetlab);
+  chk('e-hardware', hardware);
+  chk('e-software', software);
+
+  if (!valid) return;
+
+  const existing = await findMemberByEmail(email);
+  if (existing) { chk('e-email', false, 'This email already has an application.'); return; }
+
+  const member = {
+    email, name: first + ' ' + last, year, major,
+    returning, areas,
+    langs: [...document.querySelectorAll('.lang-check:checked')].map(c => c.value),
+    wetlab, hardware, software,
+    status: 'pending', tasks: {}, submittedAt: Date.now(),
+  };
+
+  try {
+    await addDoc(collection(db, 'members'), member);
+    localStorage.setItem('damp_email', email);
+    sessionEmail = email;
+    document.getElementById('form-card').innerHTML = `
+      <div class="success-state">
+        <div class="success-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="success-title">${CONFIG.submitted.title}</div>
+        <div class="success-sub">Hi ${first}! ${CONFIG.submitted.message}</div>
+      </div>`;
+  } catch(e) { alert('Something went wrong. Please try again.'); }
+};
+
+// ── PENDING GATE ──────────────────────────────────────────────────────────────
+function renderPendingGate() {
+  document.getElementById('root').innerHTML = `
+    <div class="gate">
+      <div class="gate-emoji">⏳</div>
+      <div class="gate-title">${CONFIG.pending.title}</div>
+      <div class="gate-sub">${CONFIG.pending.message}</div>
+      <button class="btn" onclick="localStorage.removeItem('damp_email');location.reload()">Not you? Switch</button>
+    </div>`;
+}
+
+// ── LEAD LOGIN ────────────────────────────────────────────────────────────────
+window.showLeadLogin = function() {
+  const C = CONFIG.lead;
+  document.getElementById('root').innerHTML = `
+    <div class="gate">
+      <div class="gate-title">${C.loginTitle}</div>
+      <div class="gate-sub">${C.loginSubtitle}</div>
+      <div style="max-width:300px;margin:0 auto;">
+        <input class="form-input" type="password" id="lead-pw" placeholder="${C.loginPlaceholder}" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')checkLeadPw()">
+        <button class="btn primary" style="width:100%" onclick="checkLeadPw()">${C.loginButton}</button>
+        <div class="form-error" id="pw-err" style="margin-top:8px;">${C.loginError}</div>
+      </div>
+    </div>`;
+};
+
+window.checkLeadPw = function() {
+  if (document.getElementById('lead-pw').value === CONFIG.leadPassword) {
+    localStorage.setItem('damp_role', 'lead');
+    sessionRole = 'lead';
+    renderLeadView();
+  } else {
+    document.getElementById('pw-err').classList.add('show');
+  }
+};
+
+// ── ONBOARDING ────────────────────────────────────────────────────────────────
+function renderOnboarding() {
+  const firstName = myRecord ? myRecord.name.split(' ')[0] : '';
+  const C = CONFIG;
+  const W = C.whoWeAre;
+
+  const PS = C.projectsSection;
+  const CM = C.comms;
+
+  document.getElementById('root').innerHTML = `
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">Onboarding</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="scrollTo2('tasks')" class="active">My tasks</a></li>
+          <li><a onclick="scrollTo2('who-we-are')">Who we are</a></li>
+          <li><a onclick="scrollTo2('general')">What everyone should know</a></li>
+          <li><a onclick="scrollTo2('projects')">Projects</a></li>
+          <li><a onclick="scrollTo2('comms')">How we communicate</a></li>
+        </ul>
+        <div class="sidebar-section">Account</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="localStorage.removeItem('damp_email');location.reload()">Sign out</a></li>
+        </ul>
+      </aside>
+      <main class="main">
+
+        <div class="section" id="tasks">
+          <div class="page-title">${C.onboarding.welcomeTitle}${firstName ? ', ' + firstName : ''}!</div>
+          <div class="page-sub">${C.onboarding.welcomeSubtitle}</div>
+          <div class="progress-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+            <div class="progress-label" id="progress-label">0 / ${C.tasks.length} ${C.onboarding.progressLabel}</div>
+          </div>
+          <div class="task-list" id="task-list"></div>
+        </div>
+
+        <div class="section" id="who-we-are">
+          <div class="section-title">${W.sectionTitle}</div>
+          <div class="card blue-bar">
+            <div class="card-title">${W.cardTitle}</div>
+            <div class="card-body">
+              <p>${W.paragraph1}</p><br>
+              <p>${W.paragraph2}</p><br>
+              <p><strong>${W.paragraph3}</strong></p>
+            </div>
+          </div>
+          <div class="section-complete" id="sc-t1"></div>
+        </div>
+
+        <div class="section" id="general">
+          <div class="section-title">${C.general.sectionTitle}</div>
+          <div class="info-block"><p>${C.general.infoText}</p></div>
+          ${C.general.items.map(item => `
+          <div class="card">
+            <div class="card-title">${item.title}</div>
+            <div class="card-body">${item.body}</div>
+          </div>`).join('')}
+          <div class="section-complete" id="sc-t2"></div>
+        </div>
+
+        <div class="section" id="projects">
+          <div class="section-title">${PS.sectionTitle}</div>
+          <div class="info-block"><p>${PS.infoText}</p></div>
+          ${C.projects.filter(p=>!p.propose).map(p=>`
+          <div class="card">
+            <div class="card-title">${p.name}</div>
+            <div class="card-body">
+              <div style="margin-bottom:10px;">
+                ${p.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}
+                <span style="font-size:12px;color:var(--text-muted);margin-left:6px;">${p.spots} open spot${p.spots!==1?'s':''}</span>
+              </div>
+              <p>${p.description}</p>
+            </div>
+          </div>`).join('')}
+          <div class="card" style="border-style:dashed;">
+            <div class="card-title">${PS.proposeTitle}</div>
+            <div class="card-body">${PS.proposeBody}</div>
+          </div>
+          <div class="section-complete" id="sc-t3"></div>
+        </div>
+
+        <div class="section" id="comms">
+          <div class="section-title">${CM.sectionTitle}</div>
+          <div class="card">
+            <div class="card-title">${CM.toolsTitle}</div>
+            <div class="card-body">
+              <p><strong>Day-to-day:</strong> ${CM.dayToDay}</p><br>
+              <p><strong>Weekly meeting:</strong> ${CM.weeklyMeeting}</p><br>
+              <p><strong>Project work:</strong> ${CM.projectWork}</p>
+            </div>
+          </div>
+          <div class="card blue-bar">
+            <div class="card-title">${CM.contactTitle}</div>
+            <div class="card-body">
+              ${CM.contacts.map(c=>`<p><strong>${c.role}:</strong> ${c.name} — ${c.contact}</p><br>`).join('')}
+              <p><strong>${CM.stuckMessage}</strong></p>
+            </div>
+          </div>
+          <div class="section-complete" id="sc-t5"></div>
+        </div>
+
+      </main>
+    </div>`;
+  renderTasks();
+  renderSectionButtons();
+}
+
+window.scrollTo2 = id => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+
+function renderTasks() {
+  const tasks = CONFIG.tasks;
+  const done = tasks.filter(t => myTasks[t.id]).length;
+  const total = tasks.length;
+  const pct = Math.round(done / total * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${done} / ${total} ${CONFIG.onboarding.progressLabel}`;
+  document.getElementById('task-list').innerHTML = tasks.map((t, i) => `
+    <div class="task-item ${myTasks[t.id] ? 'done' : ''} ${t.locked ? 'nodot' : ''}">
+      <div class="task-check">
+        <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="task-num">0${i+1}</span>
+      <span class="task-name">${t.name}</span>
+      <span class="task-time">${t.time}</span>
+    </div>`).join('');
+}
+
+function renderSectionButtons() {
+  // Map section complete containers to their task IDs
+  const map = { 'sc-t1':'t1', 'sc-t2':'t2', 'sc-t3':'t3', 'sc-t5':'t5' };
+  Object.entries(map).forEach(([elId, taskId]) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const done = !!myTasks[taskId];
+    el.innerHTML = `
+      <button class="section-complete-btn ${done ? 'done' : ''}" ${done ? '' : `onclick="toggleTask('${taskId}')"`}>
+        <div class="btn-check">
+          ${done ? `<svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+        </div>
+        ${done ? '✓ Marked as read' : 'Mark as read'}
+      </button>`;
+  });
+}
+
+window.toggleTask = async function(id) {
+  myTasks[id] = !myTasks[id];
+  renderTasks();
+  renderSectionButtons();
+  if (myRecord) {
+    try { await updateDoc(doc(db, 'members', myRecord.id), { tasks: myTasks }); } catch(e) {}
+  }
+};
+
+// ── LEAD VIEW ─────────────────────────────────────────────────────────────────
+function renderLeadView() {
+  const C = CONFIG.lead;
+  document.getElementById('root').innerHTML = `
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">Admin</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="switchTab('pending')" id="nav-pending" class="active">Pending</a></li>
+          <li><a onclick="switchTab('approved')" id="nav-approved">Approved</a></li>
+        </ul>
+        <div class="sidebar-section">Account</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="leadLogout()">Sign out</a></li>
+        </ul>
+      </aside>
+      <main class="main">
+        <div class="page-title">${C.dashboardTitle}</div>
+        <div class="page-sub" id="lead-sub">Loading...</div>
+        <div id="lead-panel"><div class="loading">Loading...</div></div>
+      </main>
+    </div>`;
+  subscribeMembers();
+}
+
+function subscribeMembers() {
+  onSnapshot(collection(db, 'members'), snap => {
+    allMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const pending = allMembers.filter(m => m.status === 'pending').length;
+    const approved = allMembers.filter(m => m.status === 'approved');
+    const onboarded = approved.filter(m =>
+      Object.values(m.tasks || {}).filter(Boolean).length === CONFIG.tasks.length).length;
+    const sub = document.getElementById('lead-sub');
+    if (sub) sub.textContent = `${CONFIG.semester} · ${pending} pending · ${approved.length} approved · ${onboarded} fully onboarded`;
+    renderLeadPanel();
+  });
+}
+
+window.switchTab = function(tab) {
+  leadTab = tab;
+  document.getElementById('nav-pending').classList.toggle('active', tab === 'pending');
+  document.getElementById('nav-approved').classList.toggle('active', tab === 'approved');
+  renderLeadPanel();
+};
+
+function renderLeadPanel() {
+  const panel = document.getElementById('lead-panel');
+  if (!panel) return;
+  leadTab === 'pending' ? renderPendingTable(panel) : renderApprovedTable(panel);
+}
+
+function pName(id) { return CONFIG.projects.find(p => p.id === id)?.name || id || '—'; }
+
+function renderPendingTable(panel) {
+  const list = allMembers.filter(m => m.status === 'pending');
+  if (!list.length) { panel.innerHTML = `<div class="tracker-wrap"><div class="loading">No pending applications.</div></div>`; return; }
+  panel.innerHTML = `
+    <div class="tracker-wrap">
+      <div class="tracker-header">
+        <span class="tracker-title">${list.length} pending application${list.length !== 1 ? 's' : ''}</span>
+      </div>
+      <table class="tracker-table">
+        <thead><tr><th>Applicant</th><th>Email</th><th>Returning</th><th>Areas of interest</th><th>Wet lab</th><th>Hardware</th><th>Software</th><th>Action</th></tr></thead>
+        <tbody>${list.map(m => `
+          <tr>
+            <td><div class="member-name">${m.name}</div><div class="member-meta">${m.year || ''} · ${m.major || ''}</div></td>
+            <td style="font-size:12px;">${m.email || '—'}</td>
+            <td style="font-size:12px;text-align:center;">${m.returning === 'yes' ? '✓' : '✗'}</td>
+            <td style="font-size:12px;color:var(--text-secondary);">${(m.areas||[]).join(', ') || '—'}</td>
+            <td style="font-size:12px;color:var(--text-secondary);">${(m.langs||[]).join(', ') || '—'}</td>
+            <td style="font-size:12px;color:var(--text-secondary);max-width:140px;">${m.wetlab || '—'}</td>
+            <td style="font-size:12px;color:var(--text-secondary);max-width:140px;">${m.hardware || '—'}</td>
+            <td style="font-size:12px;color:var(--text-secondary);max-width:140px;">${m.software || '—'}</td>
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn success" style="padding:4px 10px;font-size:11px;" onclick="approveMember('${m.id}','${m.email}','${m.name}')">${CONFIG.lead.approveButton}</button>
+                <button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="rejectMember('${m.id}')">${CONFIG.lead.declineButton}</button>
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderApprovedTable(panel) {
+  const list = allMembers.filter(m => m.status === 'approved');
+  if (!list.length) { panel.innerHTML = `<div class="tracker-wrap"><div class="loading">No approved members yet.</div></div>`; return; }
+  panel.innerHTML = `
+    <div class="tracker-wrap">
+      <div class="tracker-header">
+        <span class="tracker-title">${list.length} approved member${list.length !== 1 ? 's' : ''}</span>
+        <button class="btn" onclick="exportCSV()">${CONFIG.lead.exportButton}</button>
+      </div>
+      <table class="tracker-table">
+        <thead><tr><th>Member</th><th>Email</th><th>Project</th><th>Tasks</th><th>Status</th><th>Assign project</th></tr></thead>
+        <tbody>${list.map(m => {
+          const done = Object.values(m.tasks || {}).filter(Boolean).length;
+          const total = CONFIG.tasks.length;
+          const sc = done === total ? 'complete' : done === 0 ? 'notstarted' : 'inprogress';
+          const sl = done === total ? 'Done' : done === 0 ? 'Not started' : `${done}/${total}`;
+          const dots = CONFIG.tasks.map(t =>
+            `<div class="dot ${m.tasks && m.tasks[t.id] ? 'done' : 'pending-dot'}" title="${t.name}">${m.tasks && m.tasks[t.id] ? '✓' : ''}</div>`
+          ).join('');
+          return `<tr>
+            <td><div class="member-name">${m.name}</div><div class="member-meta">${m.year || '—'}</div></td>
+            <td style="font-size:12px;">${m.email || '—'}</td>
+            <td style="font-family:var(--mono);font-size:12px;">${m.project || '—'}</td>
+            <td><div class="tasks-dots">${dots}</div></td>
+            <td><span class="status-pill ${sc}">${sl}</span></td>
+            <td style="display:flex;gap:6px;align-items:center;">
+              <input class="form-input-inline" id="proj-${m.id}" value="${m.project || ''}" placeholder="${CONFIG.lead.assignPlaceholder}">
+              <button class="btn" style="padding:4px 10px;font-size:11px;" onclick="assignProject('${m.id}')">${CONFIG.lead.assignButton}</button>
+              <button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="rejectMember('${m.id}')">Remove</button>
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+window.approveMember = async function(id, email, name) {
+  try {
+    await updateDoc(doc(db, 'members', id), { status: 'approved', tasks: {} });
+    // Send approval email
+    await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
+      to_name: name,
+      to_email: email,
+      link: CONFIG.onboardingUrl,
+    });
+  } catch(e) { console.error(e); alert('Approved in database but email may have failed.'); }
+};
+
+window.rejectMember = async function(id) {
+  if (!confirm('Decline this application? This cannot be undone.')) return;
+  try { await deleteDoc(doc(db, 'members', id)); } catch(e) { alert('Error.'); }
+};
+
+window.assignProject = async function(id) {
+  const val = document.getElementById('proj-' + id)?.value.trim();
+  try { await updateDoc(doc(db, 'members', id), { project: val }); } catch(e) {}
+};
+
+window.leadLogout = function() {
+  localStorage.removeItem('damp_role');
+  location.reload();
+};
+
+window.exportCSV = function() {
+  const list = allMembers.filter(m => m.status === 'approved');
+  const rows = [['Name', 'Email', 'Year', 'Project', 'Tasks Done', 'Status']];
+  list.forEach(m => {
+    const done = Object.values(m.tasks || {}).filter(Boolean).length;
+    rows.push([m.name, m.email || '', m.year || '', m.project || '',
+      `${done}/${CONFIG.tasks.length}`,
+      done === CONFIG.tasks.length ? 'Complete' : done === 0 ? 'Not started' : 'In progress']);
+  });
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv,' + encodeURIComponent(csv);
+  a.download = `damp_cohort_${CONFIG.semester.replace(' ', '_')}.csv`;
+  a.click();
+};
+</script>
+</body>
+</html>
