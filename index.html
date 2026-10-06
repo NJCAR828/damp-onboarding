@@ -180,7 +180,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
     <img src="logo.png" alt="DAMP Lab" style="height:28px;width:auto;object-fit:contain;" onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'">
     <span id="logo-fallback" style="display:none;font-family:var(--mono);font-size:14px;font-weight:500;color:var(--accent);letter-spacing:0.04em;">DAMP Lab</span>
   </a>
-  <span class="semester-badge" id="header-semester">—</span>
+
 </header>
 
 <div id="root"><div class="loading">Loading...</div></div>
@@ -252,9 +252,9 @@ const CONFIG = {
     },
     {
       id: 't2',
-      name: 'Read + explore: Canvas',
-      desc: 'How it works, how to test it, and how to report bugs.',
-      time: '20 min',
+      name: 'Read: What everyone should know',
+      desc: 'Key information every lab member needs before starting.',
+      time: 'TBD',
     },
     {
       id: 't3',
@@ -286,25 +286,24 @@ const CONFIG = {
     paragraph3: 'What to expect this semester: You\'ll find or create a project in week one, make your first contribution by week two, and have a defined role by week three.',
   },
 
-  // ── Canvas section ────────────────────────────────────
-  canvas: {
-    sectionTitle: 'Canvas',
-    infoText: 'Everyone in the lab uses Canvas, regardless of project. Understanding it is your first shared responsibility.',
-    whatTitle: 'What Canvas is',
-    whatBody: '[Describe what Canvas is and why the lab uses it — 2–3 sentences.]',
-    navTitle: 'How to navigate it',
-    navBody: '[Walk through the key parts of the interface. Where do you start? What are the main areas?]',
-    bugsTitle: 'How to test and report bugs',
-    bugsIntro: 'When you find an issue, report it in this format:',
-    bugFormat: [
-      { label: 'Title', value: '[Short description of the bug]' },
-      { label: 'Steps to reproduce', value: '1. ...  2. ...  3. ...' },
-      { label: 'Expected', value: '[What should happen]' },
-      { label: 'Actual', value: '[What happened instead]' },
-      { label: 'Environment', value: '[Browser, OS, screen size]' },
+  // ── What everyone should know section ────────────────
+  general: {
+    sectionTitle: 'What everyone should know',
+    infoText: 'This section covers the essentials every lab member needs before starting — regardless of project.',
+    items: [
+      {
+        title: '[Topic 1]',
+        body: '[Content coming after director meeting — add key info here.]',
+      },
+      {
+        title: '[Topic 2]',
+        body: '[Content coming after director meeting — add key info here.]',
+      },
+      {
+        title: '[Topic 3]',
+        body: '[Content coming after director meeting — add key info here.]',
+      },
     ],
-    bugsSubmitTo: '[where — Notion / GitHub Issues / email]',
-    bugsContactPerson: '[person]',
   },
 
   // ── Projects section ──────────────────────────────────
@@ -713,7 +712,7 @@ function renderOnboarding() {
   const firstName = myRecord ? myRecord.name.split(' ')[0] : '';
   const C = CONFIG;
   const W = C.whoWeAre;
-  const CV = C.canvas;
+
   const PS = C.projectsSection;
   const CM = C.comms;
 
@@ -724,7 +723,7 @@ function renderOnboarding() {
         <ul class="sidebar-nav">
           <li><a onclick="scrollTo2('tasks')" class="active">My tasks</a></li>
           <li><a onclick="scrollTo2('who-we-are')">Who we are</a></li>
-          <li><a onclick="scrollTo2('canvas')">Canvas</a></li>
+          <li><a onclick="scrollTo2('general')">What everyone should know</a></li>
           <li><a onclick="scrollTo2('projects')">Projects</a></li>
           <li><a onclick="scrollTo2('comms')">How we communicate</a></li>
         </ul>
@@ -757,25 +756,14 @@ function renderOnboarding() {
           </div>
         </div>
 
-        <div class="section" id="canvas">
-          <div class="section-title">${CV.sectionTitle}</div>
-          <div class="info-block"><p><strong>${CV.infoText}</strong></p></div>
+        <div class="section" id="general">
+          <div class="section-title">${C.general.sectionTitle}</div>
+          <div class="info-block"><p>${C.general.infoText}</p></div>
+          ${C.general.items.map(item => `
           <div class="card">
-            <div class="card-title">${CV.whatTitle}</div>
-            <div class="card-body">${CV.whatBody}</div>
-          </div>
-          <div class="card">
-            <div class="card-title">${CV.navTitle}</div>
-            <div class="card-body">${CV.navBody}</div>
-          </div>
-          <div class="card accent-bar">
-            <div class="card-title">${CV.bugsTitle}</div>
-            <div class="card-body">
-              <p>${CV.bugsIntro}</p><br>
-              <div class="code-block">${CV.bugFormat.map(f=>`<strong>${f.label}:</strong> ${f.value}`).join('<br>')}</div>
-              <br><p>Submit to: <strong>${CV.bugsSubmitTo}</strong>. Tag <strong>${CV.bugsContactPerson}</strong> if blocking.</p>
-            </div>
-          </div>
+            <div class="card-title">${item.title}</div>
+            <div class="card-body">${item.body}</div>
+          </div>`).join('')}
         </div>
 
         <div class="section" id="projects">
