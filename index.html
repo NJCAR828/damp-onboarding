@@ -1,10 +1,11 @@
-<!-- DAMP Lab Onboarding v2.0 -->
+<!-- DAMP Lab Onboarding v2.2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DAMP Lab — Member Onboarding</title>
+<link rel="icon" href="favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
@@ -233,7 +234,7 @@ const CONFIG = {
     { id:'t1', name:'Read: Who we are', desc:'Mission, values, and what this semester looks like.', time:'5 min' },
     { id:'t2', name:'Read: What everyone should know', desc:'Key information every lab member needs before starting.', time:'TBD' },
     { id:'t3', name:'Browse: Project directory', desc:'Read every active project and submit your interest.', time:'10 min' },
-    { id:'t4', name:'Submit: Interest form', desc:'Already done — you submitted this to get here.', time:'done', locked:true },
+    { id:'t4', name:'Express interest in a project', desc:'Click "Express interest" on at least one project below.', time:'~1 min' },
     { id:'t5', name:'Read: How we communicate', desc:'Tools, norms, and who to contact for what.', time:'5 min' },
   ],
 
@@ -657,7 +658,14 @@ async function loadProjectCards() {
     try {
       const q = query(collection(db,'projectInterest'), where('email','==',email));
       const snap = await getDocs(q);
-      snap.docs.forEach(d => { const data=d.data(); myInterests[data.projectId] = { id:d.id, status:data.status||'pending' }; });
+      snap.docs.forEach(d => { const data=d.data(); myInterests[data.projectId] = { id:d.id }; });
+    // auto-check t4 if they've already expressed interest in anything
+    if (Object.keys(myInterests).length > 0 && !myTasks['t4']) {
+      myTasks['t4'] = true;
+      if (myRecord) { try { await updateDoc(doc(db,'members',myRecord.id),{tasks:myTasks}); } catch(e){} }
+      renderTasks();
+      renderSectionButtons();
+    }
     } catch(e) {}
   }
   container.innerHTML = CONFIG.projects.map(p => {
@@ -717,6 +725,13 @@ window.submitProjectInterest = async function() {
   if (!valid) return;
   try {
     await addDoc(collection(db,'projectInterest'), { name, email, projectId: currentModalProject.id, projectName: currentModalProject.name, submittedAt: Date.now() });
+    // auto-check t4
+    if (!myTasks['t4']) {
+      myTasks['t4'] = true;
+      if (myRecord) { try { await updateDoc(doc(db,'members',myRecord.id),{tasks:myTasks}); } catch(e){} }
+      renderTasks();
+      renderSectionButtons();
+    }
     closeProjectModal();
     loadProjectCards();
   } catch(e) { alert('Something went wrong. Please try again.'); }
@@ -885,7 +900,7 @@ async function renderInterestsTable(panel) {
           </div>
           ${list.length===0?`<div class="loading" style="padding:16px;">No submissions yet.</div>`:`
           <table class="tracker-table">
-            <thead><tr><th></th><th>Name</th><th>Email</th><th>Grad Year</th><th>Major</th><th>Submitted</th></tr></thead>
+            <thead><tr><th></th><th>Name</th><th>Email</th><th>Grad Year</th><th>Major</th><th>Submitted</th><th></th></tr></thead>
             <tbody>${list.map((i,idx)=>{
               const m = allMembers.find(m=>m.email===i.email);
               const detailHtml = m ? `
@@ -905,9 +920,10 @@ async function renderInterestsTable(panel) {
                   <td style="font-size:12px;">${m?.year||'—'}</td>
                   <td style="font-size:12px;">${m?.major||'—'}</td>
                   <td style="font-size:11px;color:var(--text-muted);font-family:var(--mono);">${new Date(i.submittedAt).toLocaleDateString()}</td>
+                  <td><button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="deleteInterest('${i.id}','${p.id}')">Remove</button></td>
                 </tr>
                 <tr class="detail-row" id="irow-${p.id}-${idx}">
-                  <td colspan="6" style="padding:0;"><div class="detail-panel">${detailHtml}</div></td>
+                  <td colspan="7" style="padding:0;"><div class="detail-panel">${detailHtml}</div></td>
                 </tr>`;
             }).join('')}
             </tbody>
@@ -925,6 +941,14 @@ window.toggleRow = function(rowId) {
   if (btn) btn.textContent = isOpen ? '▼' : '▶';
 };
 
+
+window.deleteInterest = async function(id, projectId) {
+  if (!confirm('Remove this person from the project? This cannot be undone.')) return;
+  try {
+    await deleteDoc(doc(db,'projectInterest',id));
+    renderInterestsTable(document.getElementById('lead-panel'));
+  } catch(e) { alert('Error removing.'); }
+};
 
 window.approveMember = async function(id,email,name) {
   try {
