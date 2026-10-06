@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v1.8 -->
+<!-- DAMP Lab Onboarding v1.9 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -594,21 +594,7 @@ function renderOnboarding() {
         <div class="section" id="projects">
           <div class="section-title">${PS.sectionTitle}</div>
           <div class="info-block"><p>${PS.infoText}</p></div>
-          ${C.projects.map(p=>`
-          <div class="project-card">
-            <div class="project-card-header">
-              <div>
-                <div class="project-card-title">${p.name}</div>
-                <div style="margin-top:4px;">${p.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}<span style="font-size:11px;color:var(--text-muted);margin-left:6px;">${p.spots} open spot${p.spots!==1?'s':''}</span></div>
-              </div>
-            </div>
-            <div class="project-card-body">${p.tagline}<br><br>${p.description}</div>
-            <div class="project-links">
-              <button class="project-link-btn join" onclick="openProjectModal('${p.id}')">Express interest</button>
-              <a class="project-link-btn" href="${p.when2meet}" target="_blank">📅 When2Meet</a>
-              <a class="project-link-btn" href="${p.chatLink}" target="_blank">💬 Request chat access</a>
-            </div>
-          </div>`).join('')}
+          <div id="project-cards-container">Loading projects...</div>
           <div class="section-complete" id="sc-t3"></div>
         </div>
 
@@ -628,6 +614,7 @@ function renderOnboarding() {
     </div>`;
   renderTasks();
   renderSectionButtons();
+  loadProjectCards();
 }
 
 window.scrollTo2 = id => document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
@@ -660,6 +647,48 @@ window.toggleTask = async function(id) {
   if (myRecord) { try { await updateDoc(doc(db,'members',myRecord.id),{tasks:myTasks}); } catch(e){} }
 };
 
+// ── PROJECT CARDS ─────────────────────────────────────────────────────────────
+async function loadProjectCards() {
+  const container = document.getElementById('project-cards-container');
+  if (!container) return;
+  const email = myRecord?.email || sessionEmail;
+  let myInterests = {};
+  if (email) {
+    try {
+      const q = query(collection(db,'projectInterest'), where('email','==',email));
+      const snap = await getDocs(q);
+      snap.docs.forEach(d => { const data=d.data(); myInterests[data.projectId] = { id:d.id, status:data.status||'pending' }; });
+    } catch(e) {}
+  }
+  container.innerHTML = CONFIG.projects.map(p => {
+    const interest = myInterests[p.id];
+    let actionHtml = '';
+    if (!interest) {
+      actionHtml = `<button class="project-link-btn join" onclick="openProjectModal('${p.id}')">Express interest</button>`;
+    } else if (interest.status === 'pending') {
+      actionHtml = `<span style="font-size:12px;color:var(--amber);font-weight:500;">⏳ Interest pending approval</span>`;
+    } else if (interest.status === 'approved') {
+      actionHtml = `
+        <span style="font-size:12px;color:var(--green);font-weight:500;">✓ Approved</span>
+        <a class="project-link-btn" href="${p.when2meet}" target="_blank">📅 When2Meet</a>
+        <a class="project-link-btn" href="${p.chatLink}" target="_blank">💬 Request chat access</a>`;
+    } else if (interest.status === 'declined') {
+      actionHtml = `<span style="font-size:12px;color:var(--red);font-weight:500;">✗ Not approved for this project</span>`;
+    }
+    return `
+      <div class="project-card">
+        <div class="project-card-header">
+          <div>
+            <div class="project-card-title">${p.name}</div>
+            <div style="margin-top:4px;">${p.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}<span style="font-size:11px;color:var(--text-muted);margin-left:6px;">${p.spots} open spot${p.spots!==1?'s':''}</span></div>
+          </div>
+        </div>
+        <div class="project-card-body">${p.tagline}<br><br>${p.description}</div>
+        <div class="project-links">${actionHtml}</div>
+      </div>`;
+  }).join('');
+}
+
 // ── PROJECT INTEREST MODAL ────────────────────────────────────────────────────
 window.openProjectModal = function(projectId) {
   const p = CONFIG.projects.find(p=>p.id===projectId);
@@ -685,13 +714,9 @@ window.submitProjectInterest = async function() {
   chk('modal-e-email', email && email.includes('@'));
   if (!valid) return;
   try {
-    await addDoc(collection(db,'projectInterest'), { name, email, projectId: currentModalProject.id, projectName: currentModalProject.name, submittedAt: Date.now() });
+    await addDoc(collection(db,'projectInterest'), { name, email, projectId: currentModalProject.id, projectName: currentModalProject.name, status: 'pending', submittedAt: Date.now() });
     closeProjectModal();
-    // auto-open when2meet after submit
-    if (currentModalProject.when2meet && !currentModalProject.when2meet.startsWith('[')) {
-      window.open(currentModalProject.when2meet, '_blank');
-    }
-    alert(`Interest submitted for ${currentModalProject.name}! Check your When2Meet and Google Chat links in the project card.`);
+    loadProjectCards();
   } catch(e) { alert('Something went wrong. Please try again.'); }
 };
 
@@ -858,13 +883,22 @@ async function renderInterestsTable(panel) {
           </div>
           ${list.length===0?`<div class="loading" style="padding:16px;">No submissions yet.</div>`:`
           <table class="tracker-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Submitted</th></tr></thead>
-            <tbody>${list.map(i=>`
-              <tr>
+            <thead><tr><th>Name</th><th>Email</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>${list.map(i=>{
+              const status = i.status || 'pending';
+              const pill = status==='approved'?`<span class="status-pill complete">Approved</span>`:status==='declined'?`<span class="status-pill notstarted">Declined</span>`:`<span class="status-pill inprogress">Pending</span>`;
+              const actions = status==='pending'?`
+                <button class="btn success" style="padding:4px 10px;font-size:11px;" onclick="approveInterest('${i.id}')">Approve</button>
+                <button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="declineInterest('${i.id}')">Decline</button>`
+                :`<button class="btn" style="padding:4px 10px;font-size:11px;" onclick="declineInterest('${i.id}')">Remove</button>`;
+              return `<tr>
                 <td class="member-name">${i.name}</td>
                 <td style="font-size:12px;">${i.email}</td>
                 <td style="font-size:11px;color:var(--text-muted);font-family:var(--mono);">${new Date(i.submittedAt).toLocaleDateString()}</td>
-              </tr>`).join('')}
+                <td>${pill}</td>
+                <td><div style="display:flex;gap:6px;">${actions}</div></td>
+              </tr>`;
+            }).join('')}
             </tbody>
           </table>`}
         </div>`;
@@ -878,6 +912,14 @@ window.toggleRow = function(rowId) {
   if (!row) return;
   const isOpen = row.classList.toggle('open');
   if (btn) btn.textContent = isOpen ? '▼' : '▶';
+};
+
+window.approveInterest = async function(id) {
+  try { await updateDoc(doc(db,'projectInterest',id),{status:'approved'}); renderInterestsTable(document.getElementById('lead-panel')); } catch(e) { alert('Error.'); }
+};
+window.declineInterest = async function(id) {
+  if (!confirm('Remove this interest submission?')) return;
+  try { await deleteDoc(doc(db,'projectInterest',id)); renderInterestsTable(document.getElementById('lead-panel')); } catch(e) { alert('Error.'); }
 };
 
 window.approveMember = async function(id,email,name) {
