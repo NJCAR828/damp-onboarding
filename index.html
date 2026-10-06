@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DAMP Lab — Member Onboarding</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f8fa; --surface: #ffffff; --border: #e2e5eb;
+  --text: #1a1d23; --text-secondary: #5a6070; --text-muted: #8a93a6;
+  --accent: #2563eb; --accent-light: #eff4ff; --accent-border: #bdd0fc;
+  --green: #16a34a; --green-light: #f0fdf4; --green-border: #bbf7d0;
+  --amber: #d97706; --amber-light: #fffbeb; --amber-border: #fde68a;
+  --red: #dc2626; --red-light: #fef2f2; --red-border: #fecaca;
+  --mono: 'JetBrains Mono', monospace; --sans: 'Inter', sans-serif;
+  --radius: 8px; --radius-lg: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111318; --surface: #1c1f27; --border: #2a2e3a;
+    --text: #e8eaf0; --text-secondary: #9099b0; --text-muted: #5a6070;
+    --accent: #4d80f0; --accent-light: #1a2340; --accent-border: #2a3d70;
+    --green: #22c55e; --green-light: #0d2018; --green-border: #14532d;
+    --amber: #fbbf24; --amber-light: #1c1500; --amber-border: #78350f;
+    --red: #f87171; --red-light: #1c0a0a; --red-border: #7f1d1d;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.6; padding-bottom: 80px; }
+.site-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+.logo { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--accent); letter-spacing: 0.04em; }
+.semester-badge { font-size: 12px; color: var(--text-muted); background: var(--bg); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; font-family: var(--mono); }
+.layout { display: grid; grid-template-columns: 220px 1fr; max-width: 1100px; margin: 0 auto; padding: 32px 24px 0; gap: 32px; align-items: start; }
+@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+.sidebar { position: sticky; top: 72px; }
+.sidebar-nav { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+.sidebar-nav a { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; color: var(--text-secondary); text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.15s; cursor: pointer; }
+.sidebar-nav a:hover { background: var(--border); color: var(--text); }
+.sidebar-nav a.active { background: var(--accent-light); color: var(--accent); }
+.sidebar-section { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 16px 10px 6px; }
+.main { min-width: 0; }
+.page-title { font-size: 26px; font-weight: 600; margin-bottom: 6px; line-height: 1.25; }
+.page-sub { color: var(--text-secondary); font-size: 14px; margin-bottom: 32px; }
+.section { margin-bottom: 40px; scroll-margin-top: 80px; }
+.section-title { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 12px; }
+.card-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+.card-body { color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+.info-block { border-left: 3px solid var(--accent); background: var(--accent-light); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 14px; }
+.info-block p { font-size: 13px; color: var(--text-secondary); }
+.progress-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+.progress-bar-bg { flex: 1; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width 0.4s ease; }
+.progress-label { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+.task-list { display: flex; flex-direction: column; gap: 10px; }
+.task-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; display: grid; grid-template-columns: 28px 1fr auto; align-items: start; gap: 14px; cursor: pointer; transition: border-color 0.15s; }
+.task-item:hover { border-color: var(--accent-border); }
+.task-item.done { background: var(--green-light); border-color: var(--green-border); }
+.task-item.nodot { cursor: default; opacity: 0.7; }
+.task-check { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: all 0.15s; }
+.task-item.done .task-check { background: var(--green); border-color: var(--green); }
+.task-check svg { display: none; }
+.task-item.done .task-check svg { display: block; }
+.task-num { font-family: var(--mono); font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.task-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.task-item.done .task-name { color: var(--green); }
+.task-desc { font-size: 13px; color: var(--text-secondary); }
+.task-time { font-family: var(--mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; margin-top: 3px; }
+.btn { font-family: var(--sans); font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+.btn:hover { border-color: var(--accent-border); color: var(--accent); }
+.btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn.primary:hover { opacity: 0.88; }
+.btn.success { background: var(--green); color: #fff; border-color: var(--green); }
+.btn.danger { background: var(--red-light); color: var(--red); border-color: var(--red-border); }
+.tracker-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 24px; }
+.tracker-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+.tracker-title { font-size: 14px; font-weight: 600; }
+.tracker-table { width: 100%; border-collapse: collapse; }
+.tracker-table th { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); background: var(--bg); }
+.tracker-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+.tracker-table tr:last-child td { border-bottom: none; }
+.tracker-table tbody tr:hover { background: var(--bg); }
+.member-name { font-weight: 500; }
+.member-meta { font-size: 11px; color: var(--text-muted); font-family: var(--mono); }
+.dot { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; }
+.dot.done { background: var(--green-light); color: var(--green); border: 1.5px solid var(--green-border); }
+.dot.pending { background: var(--bg); border: 1.5px solid var(--border); }
+.tasks-dots { display: flex; gap: 4px; }
+.status-pill { font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 20px; display: inline-block; }
+.status-pill.complete { background: var(--green-light); color: var(--green); }
+.status-pill.inprogress { background: var(--accent-light); color: var(--accent); }
+.status-pill.notstarted { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; max-width: 620px; }
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 13px; font-weight: 500; margin-bottom: 6px; display: block; }
+.form-label span { color: var(--text-muted); font-weight: 400; }
+.form-input, .form-select, .form-textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; outline: none; transition: border-color 0.15s; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+.form-textarea { resize: vertical; min-height: 80px; }
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+.form-error { font-size: 12px; color: var(--red); margin-top: 4px; display: none; }
+.form-error.show { display: block; }
+.rank-group { display: flex; flex-direction: column; gap: 8px; }
+.rank-item { display: flex; align-items: center; gap: 10px; }
+.rank-num { font-family: var(--mono); font-size: 12px; color: var(--text-muted); width: 20px; flex-shrink: 0; }
+.success-state { text-align: center; padding: 60px 32px; }
+.success-icon { width: 56px; height: 56px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; border: 2px solid var(--green-border); }
+.success-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+.success-sub { color: var(--text-secondary); font-size: 14px; }
+.gate { max-width: 540px; margin: 60px auto; text-align: center; padding: 0 24px; }
+.gate-emoji { font-size: 40px; margin-bottom: 20px; }
+.gate-title { font-size: 22px; font-weight: 600; margin-bottom: 10px; }
+.gate-sub { color: var(--text-secondary); font-size: 14px; margin-bottom: 28px; line-height: 1.7; }
+.loading { color: var(--text-muted); font-size: 13px; padding: 32px; text-align: center; }
+.code-block { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; font-family: var(--mono); font-size: 12px; color: var(--text-secondary); line-height: 1.8; }
+.tabs { display: flex; gap: 2px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3px; margin-bottom: 24px; width: fit-content; }
+.tab-btn { padding: 7px 16px; border-radius: 6px; border: none; background: none; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+.tab-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.form-input-inline { padding: 4px 8px; font-size: 12px; width: 130px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-family: var(--sans); outline: none; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="logo">DAMP Lab</span>
+  <span class="semester-badge">Fall 2025</span>
+</header>
+
+<div id="root"><div class="loading">Loading...</div></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, query, where } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBvZf_q21bXUXx3z4tXFo-nu8iseKkVMbI",
+  authDomain: "damp-lab-colonies-onboarding.firebaseapp.com",
+  projectId: "damp-lab-colonies-onboarding",
+  storageBucket: "damp-lab-colonies-onboarding.firebasestorage.app",
+  messagingSenderId: "592648927607",
+  appId: "1:592648927607:web:f8f04fc7fce5f33a9e4972"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const LEAD_PASSWORD = 'damplab2025';
+const SEMESTER = 'Fall 2025';
+const TASK_DEFS = [
+  { id:'t1', name:'Read: Who we are', desc:'Mission, values, and what this semester looks like.', time:'5 min' },
+  { id:'t2', name:'Read + explore: Canvas', desc:'How it works, how to test it, and how to report bugs.', time:'20 min' },
+  { id:'t3', name:'Browse: Project directory', desc:'Read every active project before choosing.', time:'10 min' },
+  { id:'t4', name:'Submit: Interest form', desc:'Already done — you submitted this to get here.', time:'done' },
+  { id:'t5', name:'Read: How we communicate', desc:'Tools, norms, and who to contact for what.', time:'5 min' },
+];
+const PROJECTS = [
+  { id:'pa', name:'Project A', skills:'Python, data analysis', spots:2 },
+  { id:'pb', name:'Project B', skills:'Systems design, backend', spots:3 },
+  { id:'pc', name:'Project C', skills:'Frontend, UX', spots:2 },
+  { id:'own', name:'Propose my own project', skills:'—', spots:99 },
+];
+
+// ── Session state ──
+let sessionEmail = localStorage.getItem('damp_email') || null;
+let sessionRole = localStorage.getItem('damp_role') || null; // 'lead' | 'member'
+let myRecord = null;
+let myTasks = {};
+
+window.db = db;
+window.collection = collection;
+window.doc = doc;
+window.getDocs = getDocs;
+window.addDoc = addDoc;
+window.updateDoc = updateDoc;
+window.deleteDoc = deleteDoc;
+window.onSnapshot = onSnapshot;
+window.query = query;
+window.where = where;
+window.TASK_DEFS = TASK_DEFS;
+window.PROJECTS = PROJECTS;
+window.SEMESTER = SEMESTER;
+window.LEAD_PASSWORD = LEAD_PASSWORD;
+
+window.sessionEmail = sessionEmail;
+window.sessionRole = sessionRole;
+window.myRecord = myRecord;
+window.myTasks = myTasks;
+
+await init();
+
+async function init() {
+  if (sessionRole === 'lead') { renderLeadView(); return; }
+  if (sessionEmail) {
+    const found = await findMemberByEmail(sessionEmail);
+    if (found) {
+      myRecord = found;
+      window.myRecord = found;
+      if (found.status === 'approved') {
+        myTasks = found.tasks || {};
+        window.myTasks = myTasks;
+        renderOnboarding();
+      } else {
+        renderPendingGate();
+      }
+      return;
+    }
+  }
+  renderInterestForm();
+}
+
+async function findMemberByEmail(email) {
+  const q = query(collection(db, 'members'), where('email', '==', email));
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  return { id: snap.docs[0].id, ...snap.docs[0].data() };
+}
+
+// ── INTEREST FORM ──
+function renderInterestForm() {
+  document.getElementById('root').innerHTML = `
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">Getting started</div>
+        <ul class="sidebar-nav">
+          <li><a class="active">Interest form</a></li>
+        </ul>
+        <div class="sidebar-section">Admin</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="showLeadLogin()">Lead login</a></li>
+        </ul>
+      </aside>
+      <main class="main">
+        <div class="page-title">Join DAMP Lab</div>
+        <div class="page-sub">Tell us about yourself and what you'd like to work on. Once reviewed you'll get access to the full onboarding portal.</div>
+        <div class="form-card" id="form-card">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First name</label>
+              <input class="form-input" id="f-first" placeholder="Jane">
+              <div class="form-error" id="e-first">Required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last name</label>
+              <input class="form-input" id="f-last" placeholder="Smith">
+              <div class="form-error" id="e-last">Required</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="f-email" type="email" placeholder="jane@university.edu">
+            <div class="form-error" id="e-email">Enter a valid email</div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Year</label>
+              <select class="form-select" id="f-year">
+                <option value="">Select year</option>
+                <option>Freshman</option><option>Sophomore</option>
+                <option>Junior</option><option>Senior</option>
+              </select>
+              <div class="form-error" id="e-year">Required</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Major</label>
+              <input class="form-input" id="f-major" placeholder="Computer Science">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Relevant skills or experience <span>(brief)</span></label>
+            <textarea class="form-textarea" id="f-skills" placeholder="e.g. Python, React, some lab experience..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project interest ranking</label>
+            <div class="rank-group">
+              ${[1,2,3].map(n => `
+              <div class="rank-item">
+                <span class="rank-num">${n}.</span>
+                <select class="form-select" id="f-rank${n}" style="flex:1">
+                  <option value="">— ${n===1?'1st':n===2?'2nd':'3rd'} choice —</option>
+                  ${PROJECTS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}
+                </select>
+              </div>`).join('')}
+            </div>
+            <div class="form-error" id="e-rank">Select at least your first choice</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Focus preference <span>(optional)</span></label>
+            <select class="form-select" id="f-focus">
+              <option value="">Select one</option>
+              <option value="deep">Go deep — one project, full commitment</option>
+              <option value="broad">Explore broadly — see where I can help</option>
+              <option value="unsure">Not sure yet</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Anything else we should know? <span>(optional)</span></label>
+            <textarea class="form-textarea" id="f-notes" placeholder="Scheduling constraints, prior context, questions..."></textarea>
+          </div>
+          <button class="btn primary" style="width:100%;padding:11px;" onclick="submitForm()">Submit application</button>
+        </div>
+      </main>
+    </div>`;
+}
+
+window.submitForm = async function() {
+  const first = document.getElementById('f-first').value.trim();
+  const last = document.getElementById('f-last').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const year = document.getElementById('f-year').value;
+  const rank1 = document.getElementById('f-rank1').value;
+  let valid = true;
+  const check = (id, errId, cond) => { if (!cond) { document.getElementById(errId).classList.add('show'); valid = false; } else document.getElementById(errId).classList.remove('show'); };
+  check('f-first','e-first', first);
+  check('f-last','e-last', last);
+  check('f-email','e-email', email && email.includes('@'));
+  check('f-year','e-year', year);
+  check('f-rank1','e-rank', rank1);
+  if (!valid) return;
+
+  const existing = await findMemberByEmail(email);
+  if (existing) {
+    document.getElementById('e-email').textContent = 'This email already has an application.';
+    document.getElementById('e-email').classList.add('show');
+    return;
+  }
+
+  const member = {
+    email, name: first+' '+last, year,
+    major: document.getElementById('f-major').value.trim(),
+    skills: document.getElementById('f-skills').value.trim(),
+    rank1, rank2: document.getElementById('f-rank2').value,
+    rank3: document.getElementById('f-rank3').value,
+    focus: document.getElementById('f-focus').value,
+    notes: document.getElementById('f-notes').value.trim(),
+    status: 'pending', tasks: {}, submittedAt: Date.now(),
+  };
+
+  try {
+    await addDoc(collection(db, 'members'), member);
+    localStorage.setItem('damp_email', email);
+    window.sessionEmail = email;
+    document.getElementById('form-card').innerHTML = `
+      <div class="success-state">
+        <div class="success-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="success-title">Application submitted</div>
+        <div class="success-sub">You're on the list, ${first}. The lab lead will review your application and you'll get access once approved. Bookmark this page and check back.</div>
+      </div>`;
+  } catch(e) { alert('Something went wrong. Please try again.'); }
+};
+
+// ── PENDING GATE ──
+function renderPendingGate() {
+  document.getElementById('root').innerHTML = `
+    <div class="gate">
+      <div class="gate-emoji">⏳</div>
+      <div class="gate-title">Application received</div>
+      <div class="gate-sub">Your interest form has been submitted. The lab lead will review applications and you'll get access to the onboarding materials once approved.<br><br>Bookmark this page and check back — no email needed.</div>
+      <button class="btn" onclick="localStorage.removeItem('damp_email');location.reload()">Not you? Switch account</button>
+    </div>`;
+}
+
+// ── LEAD LOGIN ──
+window.showLeadLogin = function() {
+  document.getElementById('root').innerHTML = `
+    <div class="gate">
+      <div class="gate-title">Lead login</div>
+      <div class="gate-sub">Enter your lead password to access the admin dashboard.</div>
+      <div style="max-width:300px;margin:0 auto;">
+        <input class="form-input" type="password" id="lead-pw" placeholder="Password" style="margin-bottom:12px;" onkeydown="if(event.key==='Enter')checkLeadPw()">
+        <button class="btn primary" style="width:100%" onclick="checkLeadPw()">Sign in</button>
+        <div class="form-error show" id="pw-err" style="display:none;margin-top:8px;">Incorrect password</div>
+      </div>
+    </div>`;
+};
+
+window.checkLeadPw = function() {
+  const pw = document.getElementById('lead-pw').value;
+  if (pw === LEAD_PASSWORD) {
+    localStorage.setItem('damp_role','lead');
+    window.sessionRole = 'lead';
+    renderLeadView();
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+  }
+};
+
+// ── ONBOARDING (approved members) ──
+function renderOnboarding() {
+  const firstName = myRecord ? myRecord.name.split(' ')[0] : '';
+  document.getElementById('root').innerHTML = `
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">Onboarding</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="scrollTo2('my-tasks')" class="active">My tasks</a></li>
+          <li><a onclick="scrollTo2('who-we-are')">Who we are</a></li>
+          <li><a onclick="scrollTo2('canvas')">Canvas</a></li>
+          <li><a onclick="scrollTo2('projects')">Projects</a></li>
+          <li><a onclick="scrollTo2('comms')">How we communicate</a></li>
+        </ul>
+      </aside>
+      <main class="main">
+        <div class="section" id="my-tasks">
+          <div class="page-title">Welcome to DAMP Lab${firstName?', '+firstName:''}!</div>
+          <div class="page-sub">Complete the tasks below before your first project meeting. Estimated time: 45 minutes.</div>
+          <div class="progress-wrap">
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+            <div class="progress-label" id="progress-label">0 / 5 complete</div>
+          </div>
+          <div class="task-list" id="task-list"></div>
+        </div>
+
+        <div class="section" id="who-we-are">
+          <div class="section-title">Who we are</div>
+          <div class="card">
+            <div class="card-title">About DAMP Lab</div>
+            <div class="card-body">
+              <p>DAMP Lab is a student-led research and build group focused on [your mission here]. Each semester we take on a cohort of 10–20 undergraduates who contribute to active projects or propose their own.</p><br>
+              <p>We work at the intersection of research and engineering — that means you'll write code, run experiments, and ship things that matter. Past cohort members have [highlight: published, presented at X, built Y].</p><br>
+              <p><strong>What to expect this semester:</strong> You'll find or create a project in week one, make your first contribution by week two, and have a defined role by week three.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" id="canvas">
+          <div class="section-title">Canvas</div>
+          <div class="info-block"><p><strong>Everyone in the lab uses Canvas</strong>, regardless of project. Understanding it is your first shared responsibility.</p></div>
+          <div class="card"><div class="card-title">What Canvas is</div><div class="card-body">[Describe what Canvas is and why the lab uses it — 2–3 sentences.]</div></div>
+          <div class="card"><div class="card-title">How to navigate it</div><div class="card-body">[Walk through the key parts of the interface.]</div></div>
+          <div class="card">
+            <div class="card-title">How to test and report bugs</div>
+            <div class="card-body">
+              <p>When you find an issue, report it in this format:</p><br>
+              <div class="code-block"><strong>Title:</strong> [Short description]<br><strong>Steps to reproduce:</strong> 1. ... 2. ... 3. ...<br><strong>Expected:</strong> [What should happen]<br><strong>Actual:</strong> [What happened instead]<br><strong>Environment:</strong> [Browser, OS, screen size]</div><br>
+              <p>Submit to: <strong>[where]</strong>. Tag <strong>[person]</strong> if blocking.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" id="projects">
+          <div class="section-title">Active projects</div>
+          <div class="info-block"><p>Your placement is based on your interest form. Your lead will reach out once assigned.</p></div>
+          ${PROJECTS.filter(p=>p.id!=='own').map(p=>`
+          <div class="card">
+            <div class="card-title">${p.name}</div>
+            <div class="card-body"><p><strong>Open spots:</strong> ${p.spots} · <strong>Skills:</strong> ${p.skills}</p><br><p>[Description: what problem it solves, status, what a new contributor works on first.]</p></div>
+          </div>`).join('')}
+          <div class="card" style="border-style:dashed;"><div class="card-title">Propose your own project</div><div class="card-body">Have an idea? Talk to [lead name] or fill out the proposal form: [link].</div></div>
+        </div>
+
+        <div class="section" id="comms">
+          <div class="section-title">How we communicate</div>
+          <div class="card">
+            <div class="card-title">Tools and cadence</div>
+            <div class="card-body">
+              <p><strong>Day-to-day:</strong> [Tool] — expected response within 24 hours on weekdays.</p><br>
+              <p><strong>Weekly meeting:</strong> [Day, time, location/link].</p><br>
+              <p><strong>Project work:</strong> Tracked in [Notion/GitHub]. Your project lead will walk you through it on day one.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Who to contact</div>
+            <div class="card-body">
+              <p><strong>General questions:</strong> [Name] — [contact]</p><br>
+              <p><strong>Canvas / technical issues:</strong> [Name] — [contact]</p><br>
+              <p><strong>Project placement:</strong> [Name] — [contact]</p><br>
+              <p><strong>Stuck for more than an hour?</strong> Ask. Don't spiral.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>`;
+  renderTasks();
+}
+
+window.scrollTo2 = function(id) { document.getElementById(id)?.scrollIntoView({ behavior:'smooth' }); };
+
+function renderTasks() {
+  const done = TASK_DEFS.filter(t => myTasks[t.id]).length;
+  document.getElementById('progress-fill').style.width = (done/TASK_DEFS.length*100)+'%';
+  document.getElementById('progress-label').textContent = done+' / '+TASK_DEFS.length+' complete';
+  document.getElementById('task-list').innerHTML = TASK_DEFS.map((t,i) => `
+    <div class="task-item ${myTasks[t.id]?'done':''} ${t.id==='t4'?'nodot':''}" onclick="${t.id!=='t4'?`toggleTask('${t.id}')`:''}" >
+      <div class="task-check"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div><div class="task-num">Task ${i+1}</div><div class="task-name">${t.name}</div><div class="task-desc">${t.desc}</div></div>
+      <div class="task-time">${t.time}</div>
+    </div>`).join('');
+}
+
+window.toggleTask = async function(id) {
+  myTasks[id] = !myTasks[id];
+  window.myTasks = myTasks;
+  renderTasks();
+  if (myRecord) {
+    try { await updateDoc(doc(db,'members',myRecord.id), { tasks: myTasks }); } catch(e) {}
+  }
+};
+
+// ── LEAD VIEW ──
+let allMembers = [];
+let leadTab = 'pending';
+
+function renderLeadView() {
+  document.getElementById('root').innerHTML = `
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">Admin</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="switchLeadTab('pending')" id="nav-pending" class="active">Pending</a></li>
+          <li><a onclick="switchLeadTab('approved')" id="nav-approved">Approved</a></li>
+        </ul>
+        <div class="sidebar-section">Account</div>
+        <ul class="sidebar-nav">
+          <li><a onclick="leadLogout()">Sign out</a></li>
+        </ul>
+      </aside>
+      <main class="main">
+        <div class="page-title">Cohort tracker</div>
+        <div class="page-sub" id="lead-sub">Loading...</div>
+        <div id="lead-panel"><div class="loading">Loading...</div></div>
+      </main>
+    </div>`;
+  subscribeMembers();
+}
+
+function subscribeMembers() {
+  onSnapshot(collection(db,'members'), snap => {
+    allMembers = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    const pending = allMembers.filter(m=>m.status==='pending');
+    const approved = allMembers.filter(m=>m.status==='approved');
+    const onboarded = approved.filter(m=>Object.values(m.tasks||{}).filter(Boolean).length===TASK_DEFS.length).length;
+    document.getElementById('lead-sub').textContent = `${SEMESTER} · ${pending.length} pending · ${approved.length} approved · ${onboarded} fully onboarded`;
+    renderLeadPanel();
+  });
+}
+
+window.switchLeadTab = function(tab) {
+  leadTab = tab;
+  document.getElementById('nav-pending').classList.toggle('active', tab==='pending');
+  document.getElementById('nav-approved').classList.toggle('active', tab==='approved');
+  renderLeadPanel();
+};
+
+function renderLeadPanel() {
+  const panel = document.getElementById('lead-panel');
+  if (!panel) return;
+  if (leadTab === 'pending') renderPendingTable(panel);
+  else renderApprovedTable(panel);
+}
+
+function projectName(id) { return PROJECTS.find(p=>p.id===id)?.name || id || '—'; }
+
+function renderPendingTable(panel) {
+  const list = allMembers.filter(m=>m.status==='pending');
+  if (!list.length) { panel.innerHTML=`<div class="tracker-wrap"><div class="loading">No pending applications.</div></div>`; return; }
+  panel.innerHTML = `
+    <div class="tracker-wrap">
+      <div class="tracker-header"><span class="tracker-title">${list.length} pending application${list.length!==1?'s':''}</span></div>
+      <table class="tracker-table">
+        <thead><tr><th>Applicant</th><th>Email</th><th>Skills</th><th>Preferences</th><th>Notes</th><th>Action</th></tr></thead>
+        <tbody>${list.map(m=>`
+        <tr>
+          <td><div class="member-name">${m.name}</div><div class="member-meta">${m.year||''} · ${m.major||''}</div></td>
+          <td style="font-size:12px;">${m.email||'—'}</td>
+          <td style="font-size:12px;color:var(--text-secondary);max-width:160px;">${m.skills||'—'}</td>
+          <td style="font-size:12px;line-height:1.8;">
+            <div>1. ${projectName(m.rank1)}</div>
+            ${m.rank2?`<div>2. ${projectName(m.rank2)}</div>`:''}
+            ${m.rank3?`<div>3. ${projectName(m.rank3)}</div>`:''}
+            ${m.focus?`<div style="color:var(--text-muted);margin-top:2px;">${m.focus==='deep'?'Deep focus':m.focus==='broad'?'Broad explore':'Unsure'}</div>`:''}
+          </td>
+          <td style="font-size:12px;color:var(--text-secondary);max-width:160px;">${m.notes||'—'}</td>
+          <td>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn success" style="padding:4px 10px;font-size:11px;" onclick="approveMember('${m.id}')">Approve</button>
+              <button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="rejectMember('${m.id}')">Decline</button>
+            </div>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderApprovedTable(panel) {
+  const list = allMembers.filter(m=>m.status==='approved');
+  if (!list.length) { panel.innerHTML=`<div class="tracker-wrap"><div class="loading">No approved members yet.</div></div>`; return; }
+  panel.innerHTML = `
+    <div class="tracker-wrap">
+      <div class="tracker-header">
+        <span class="tracker-title">${list.length} approved member${list.length!==1?'s':''}</span>
+        <button class="btn" onclick="exportCSV()">Export CSV</button>
+      </div>
+      <table class="tracker-table">
+        <thead><tr><th>Member</th><th>Email</th><th>Project</th><th>Tasks</th><th>Status</th><th>Assign project</th></tr></thead>
+        <tbody>${list.map(m=>{
+          const done = Object.values(m.tasks||{}).filter(Boolean).length;
+          const total = TASK_DEFS.length;
+          const sc = done===total?'complete':done===0?'notstarted':'inprogress';
+          const sl = done===total?'Done':done===0?'Not started':`${done}/${total}`;
+          const dots = TASK_DEFS.map(t=>`<div class="dot ${m.tasks&&m.tasks[t.id]?'done':'pending'}" title="${t.name}">${m.tasks&&m.tasks[t.id]?'✓':''}</div>`).join('');
+          return `<tr>
+            <td><div class="member-name">${m.name}</div><div class="member-meta">${m.year||'—'}</div></td>
+            <td style="font-size:12px;">${m.email||'—'}</td>
+            <td style="font-family:var(--mono);font-size:12px;">${m.project||'—'}</td>
+            <td><div class="tasks-dots">${dots}</div></td>
+            <td><span class="status-pill ${sc}">${sl}</span></td>
+            <td style="display:flex;gap:6px;align-items:center;">
+              <input class="form-input-inline" id="proj-${m.id}" value="${m.project||''}" placeholder="Project name">
+              <button class="btn" style="padding:4px 10px;font-size:11px;" onclick="assignProject('${m.id}')">Save</button>
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+window.approveMember = async function(id) {
+  try { await updateDoc(doc(db,'members',id), { status:'approved', tasks:{} }); } catch(e) { alert('Error.'); }
+};
+window.rejectMember = async function(id) {
+  if (!confirm('Decline this application?')) return;
+  try { await deleteDoc(doc(db,'members',id)); } catch(e) { alert('Error.'); }
+};
+window.assignProject = async function(id) {
+  const val = document.getElementById('proj-'+id)?.value.trim();
+  try { await updateDoc(doc(db,'members',id), { project: val }); } catch(e) {}
+};
+window.leadLogout = function() {
+  localStorage.removeItem('damp_role');
+  location.reload();
+};
+window.exportCSV = function() {
+  const list = allMembers.filter(m=>m.status==='approved');
+  const rows = [['Name','Email','Year','Project','Tasks Done','Status']];
+  list.forEach(m=>{
+    const done=Object.values(m.tasks||{}).filter(Boolean).length;
+    rows.push([m.name,m.email||'',m.year||'',m.project||'',done+'/'+TASK_DEFS.length,done===TASK_DEFS.length?'Complete':done===0?'Not started':'In progress']);
+  });
+  const csv=rows.map(r=>r.map(c=>'"'+c+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(csv);a.download='damp_cohort.csv';a.click();
+};
+</script>
+</body>
+</html>
