@@ -465,6 +465,21 @@ function renderInterestForm() {
       <main class="main">
         <div class="page-title">${C.pageTitle}</div>
         <div class="page-sub">${C.pageSubtitle}</div>
+        <div class="info-block" style="max-width:620px;margin-bottom:16px;">
+          <p>Already applied? <strong><a href="#" onclick="showLookup()" style="color:var(--accent);text-decoration:none;">Check your application status →</a></strong></p>
+        </div>
+        <div id="lookup-card" style="display:none;max-width:620px;" class="form-card">
+          <div style="font-size:15px;font-weight:600;margin-bottom:16px;">Check application status</div>
+          <div class="form-group">
+            <label class="form-label">Enter your school email</label>
+            <input class="form-input" id="lookup-email" type="email" placeholder="douglas@university.edu" onkeydown="if(event.key==='Enter')lookupEmail()">
+            <div class="form-error" id="lookup-err">No application found for that email.</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn primary" style="flex:1;padding:9px;" onclick="lookupEmail()">Check status</button>
+            <button class="btn" style="flex:1;padding:9px;" onclick="hideLookup()">Cancel</button>
+          </div>
+        </div>
         <div class="form-card" id="form-card">
           <div class="form-row">
             <div class="form-group">
@@ -554,15 +569,16 @@ function renderInterestForm() {
             <div class="form-error" id="e-software">Required</div>
           </div>
 
+
+
           <div class="form-group">
-            <label class="form-label">What programming languages do you know? <span style="color:var(--accent)">*</span></label>
+            <label class="form-label">What programming languages do you know? <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
             <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;">
               ${['Python','JavaScript','C/C++','HTML/CSS','MATLAB','Other'].map(lang => `
               <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;min-width:120px;">
                 <input type="checkbox" value="${lang}" class="lang-check" style="accent-color:var(--accent);"> ${lang}
               </label>`).join('')}
             </div>
-            <div class="form-error" id="e-langs">Select at least one</div>
           </div>
 
           <button class="btn primary" style="width:100%;padding:11px;margin-top:8px;" onclick="submitForm()">${C.submitButton}</button>
@@ -570,6 +586,33 @@ function renderInterestForm() {
       </main>
     </div>`;
 }
+
+window.showLookup = function() {
+  document.getElementById('lookup-card').style.display = 'block';
+  document.getElementById('form-card').style.display = 'none';
+};
+window.hideLookup = function() {
+  document.getElementById('lookup-card').style.display = 'none';
+  document.getElementById('form-card').style.display = 'block';
+};
+window.lookupEmail = async function() {
+  const email = document.getElementById('lookup-email').value.trim();
+  if (!email || !email.includes('@')) return;
+  const found = await findMemberByEmail(email);
+  if (!found) {
+    document.getElementById('lookup-err').classList.add('show');
+    return;
+  }
+  localStorage.setItem('damp_email', email);
+  sessionEmail = email;
+  myRecord = found;
+  if (found.status === 'approved') {
+    myTasks = found.tasks || {};
+    renderOnboarding();
+  } else {
+    renderPendingGate();
+  }
+};
 
 window.submitForm = async function() {
   const first = document.getElementById('f-first').value.trim();
@@ -579,7 +622,7 @@ window.submitForm = async function() {
   const major = document.getElementById('f-major').value.trim();
   const returning = document.querySelector('input[name="returning"]:checked')?.value || '';
   const areas = [...document.querySelectorAll('input[type="checkbox"][value]')].filter(c => ['Robotics','Protocols','Choreography','Interface'].includes(c.value) && c.checked).map(c => c.value);
-  const langs = [...document.querySelectorAll('.lang-check:checked')].map(c => c.value);
+
   const wetlab = document.getElementById('f-wetlab').value.trim();
   const hardware = document.getElementById('f-hardware').value.trim();
   const software = document.getElementById('f-software').value.trim();
@@ -600,7 +643,7 @@ window.submitForm = async function() {
   chk('e-wetlab', wetlab);
   chk('e-hardware', hardware);
   chk('e-software', software);
-  chk('e-langs', langs.length > 0);
+
   if (!valid) return;
 
   const existing = await findMemberByEmail(email);
@@ -608,7 +651,8 @@ window.submitForm = async function() {
 
   const member = {
     email, name: first + ' ' + last, year, major,
-    returning, areas, langs,
+    returning, areas,
+    langs: [...document.querySelectorAll('.lang-check:checked')].map(c => c.value),
     wetlab, hardware, software,
     status: 'pending', tasks: {}, submittedAt: Date.now(),
   };
@@ -874,7 +918,7 @@ function renderPendingTable(panel) {
         <span class="tracker-title">${list.length} pending application${list.length !== 1 ? 's' : ''}</span>
       </div>
       <table class="tracker-table">
-        <thead><tr><th>Applicant</th><th>Email</th><th>Returning</th><th>Areas of interest</th><th>Languages</th><th>Wet lab</th><th>Hardware</th><th>Software</th><th>Action</th></tr></thead>
+        <thead><tr><th>Applicant</th><th>Email</th><th>Returning</th><th>Areas of interest</th><th>Wet lab</th><th>Hardware</th><th>Software</th><th>Action</th></tr></thead>
         <tbody>${list.map(m => `
           <tr>
             <td><div class="member-name">${m.name}</div><div class="member-meta">${m.year || ''} · ${m.major || ''}</div></td>
@@ -925,6 +969,7 @@ function renderApprovedTable(panel) {
             <td style="display:flex;gap:6px;align-items:center;">
               <input class="form-input-inline" id="proj-${m.id}" value="${m.project || ''}" placeholder="${CONFIG.lead.assignPlaceholder}">
               <button class="btn" style="padding:4px 10px;font-size:11px;" onclick="assignProject('${m.id}')">${CONFIG.lead.assignButton}</button>
+              <button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="rejectMember('${m.id}')">Remove</button>
             </td>
           </tr>`;
         }).join('')}</tbody>
