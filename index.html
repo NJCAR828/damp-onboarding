@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v1.5 -->
+<!-- DAMP Lab Onboarding v1.6 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -92,24 +92,25 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .progress-label { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
 
 /* Tasks */
-.task-list { display: flex; flex-direction: column; gap: 10px; }
-.task-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: border-color 0.15s; }
-.task-item:hover { border-color: var(--accent-border); }
+.task-list { display: flex; flex-direction: column; gap: 6px; }
+.task-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; display: flex; align-items: center; gap: 12px; }
 .task-item.done { background: var(--green-light); border-color: var(--green-border); }
-.task-item.nodot { cursor: default; opacity: 0.7; }
-.task-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.task-check { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+.task-item.nodot { opacity: 0.7; }
+.task-check { width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
 .task-item.done .task-check { background: var(--green); border-color: var(--green); }
 .task-check svg { display: none; }
 .task-item.done .task-check svg { display: block; }
-.task-num { font-family: var(--mono); font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
-.task-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.task-num { font-family: var(--mono); font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+.task-name { font-size: 13px; font-weight: 500; flex: 1; }
 .task-item.done .task-name { color: var(--green); }
-.task-desc { font-size: 13px; color: var(--text-secondary); }
-.task-footer { display: flex; align-items: center; justify-content: space-between; }
-.task-time { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
-.task-mark { font-size: 12px; font-weight: 500; color: var(--accent); }
-.task-item.done .task-mark { color: var(--green); }
+.task-time { font-family: var(--mono); font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+/* Section complete button */
+.section-complete { display: flex; align-items: center; justify-content: flex-end; margin-top: 12px; gap: 10px; }
+.section-complete-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-secondary); font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.section-complete-btn:hover { border-color: var(--accent-border); color: var(--accent); }
+.section-complete-btn.done { background: var(--green-light); border-color: var(--green-border); color: var(--green); cursor: default; }
+.section-complete-btn .btn-check { width: 16px; height: 16px; border: 2px solid currentColor; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.section-complete-btn.done .btn-check { background: var(--green); border-color: var(--green); }
 
 /* Buttons */
 .btn { font-family: var(--sans); font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
@@ -759,6 +760,7 @@ function renderOnboarding() {
               <p><strong>${W.paragraph3}</strong></p>
             </div>
           </div>
+          <div class="section-complete" id="sc-t1"></div>
         </div>
 
         <div class="section" id="general">
@@ -769,6 +771,7 @@ function renderOnboarding() {
             <div class="card-title">${item.title}</div>
             <div class="card-body">${item.body}</div>
           </div>`).join('')}
+          <div class="section-complete" id="sc-t2"></div>
         </div>
 
         <div class="section" id="projects">
@@ -789,6 +792,7 @@ function renderOnboarding() {
             <div class="card-title">${PS.proposeTitle}</div>
             <div class="card-body">${PS.proposeBody}</div>
           </div>
+          <div class="section-complete" id="sc-t3"></div>
         </div>
 
         <div class="section" id="comms">
@@ -808,11 +812,13 @@ function renderOnboarding() {
               <p><strong>${CM.stuckMessage}</strong></p>
             </div>
           </div>
+          <div class="section-complete" id="sc-t5"></div>
         </div>
 
       </main>
     </div>`;
   renderTasks();
+  renderSectionButtons();
 }
 
 window.scrollTo2 = id => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
@@ -825,30 +831,39 @@ function renderTasks() {
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('progress-label').textContent = `${done} / ${total} ${CONFIG.onboarding.progressLabel}`;
   document.getElementById('task-list').innerHTML = tasks.map((t, i) => `
-    <div class="task-item ${myTasks[t.id] ? 'done' : ''} ${t.locked ? 'nodot' : ''}"
-         onclick="${!t.locked ? `toggleTask('${t.id}')` : ''}">
-      <div class="task-header">
-        <div>
-          <div class="task-num">Task ${i + 1}</div>
-          <div class="task-name">${t.name}</div>
-        </div>
-        <div class="task-check">
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
+    <div class="task-item ${myTasks[t.id] ? 'done' : ''} ${t.locked ? 'nodot' : ''}">
+      <div class="task-check">
+        <svg width="9" height="7" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
       </div>
-      <div class="task-desc">${t.desc}</div>
-      <div class="task-footer">
-        <span class="task-time">${t.time}</span>
-        ${!t.locked ? `<span class="task-mark">${myTasks[t.id] ? '✓ Done' : 'Mark complete'}</span>` : ''}
-      </div>
+      <span class="task-num">0${i+1}</span>
+      <span class="task-name">${t.name}</span>
+      <span class="task-time">${t.time}</span>
     </div>`).join('');
+}
+
+function renderSectionButtons() {
+  // Map section complete containers to their task IDs
+  const map = { 'sc-t1':'t1', 'sc-t2':'t2', 'sc-t3':'t3', 'sc-t5':'t5' };
+  Object.entries(map).forEach(([elId, taskId]) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const done = !!myTasks[taskId];
+    el.innerHTML = `
+      <button class="section-complete-btn ${done ? 'done' : ''}" ${done ? '' : `onclick="toggleTask('${taskId}')"`}>
+        <div class="btn-check">
+          ${done ? `<svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+        </div>
+        ${done ? '✓ Marked as read' : 'Mark as read'}
+      </button>`;
+  });
 }
 
 window.toggleTask = async function(id) {
   myTasks[id] = !myTasks[id];
   renderTasks();
+  renderSectionButtons();
   if (myRecord) {
     try { await updateDoc(doc(db, 'members', myRecord.id), { tasks: myTasks }); } catch(e) {}
   }
