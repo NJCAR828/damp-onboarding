@@ -1,10 +1,10 @@
-<!-- DAMP Lab Onboarding v2.2 -->
+<!-- DAMP Lab Onboarding v2.3 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>DAMP Lab — Member Onboarding</title>
+<title>DAMP Lab Colonies Program</title>
 <link rel="icon" href="favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -74,7 +74,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .task-num { font-family: var(--mono); font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
 .task-name { font-size: 13px; font-weight: 500; flex: 1; }
 .task-item.done .task-name { color: var(--green); }
-.task-time { font-family: var(--mono); font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+
 .section-complete { display: flex; align-items: center; justify-content: flex-end; margin-top: 12px; gap: 10px; }
 .section-complete-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-secondary); font-family: var(--sans); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
 .section-complete-btn:hover { border-color: var(--accent-border); color: var(--accent); }
@@ -231,11 +231,11 @@ const CONFIG = {
   },
 
   tasks: [
-    { id:'t1', name:'Read: Who we are', desc:'Mission, values, and what this semester looks like.', time:'5 min' },
-    { id:'t2', name:'Read: What everyone should know', desc:'Key information every lab member needs before starting.', time:'TBD' },
-    { id:'t3', name:'Browse: Project directory', desc:'Read every active project and submit your interest.', time:'10 min' },
-    { id:'t4', name:'Express interest in a project', desc:'Click "Express interest" on at least one project below.', time:'~1 min' },
-    { id:'t5', name:'Read: How we communicate', desc:'Tools, norms, and who to contact for what.', time:'5 min' },
+    { id:'t1', name:'Read: Who we are', desc:'Mission, values, and what this semester looks like.' },
+    { id:'t2', name:'Read: What everyone should know', desc:'Key information every lab member needs before starting.' },
+    { id:'t3', name:'Browse: Project directory', desc:'Read every active project and submit your interest.' },
+    { id:'t4', name:'Express interest in a project', desc:'Click "Express interest" on at least one project below.' },
+    { id:'t5', name:'Read: How we communicate', desc:'Tools, norms, and who to contact for what.' },
   ],
 
   whoWeAre: {
@@ -624,13 +624,12 @@ function renderTasks() {
   const tasks = CONFIG.tasks;
   const done = tasks.filter(t=>myTasks[t.id]).length;
   document.getElementById('progress-fill').style.width = Math.round(done/tasks.length*100)+'%';
-  document.getElementById('progress-label').textContent = `${done} / ${tasks.length} ${CONFIG.onboarding.progressLabel}`;
+  document.getElementById('progress-label').textContent = `${done} / 5 ${CONFIG.onboarding.progressLabel}`;
   document.getElementById('task-list').innerHTML = tasks.map((t,i)=>`
     <div class="task-item ${myTasks[t.id]?'done':''} ${t.locked?'nodot':''}">
       <div class="task-check"><svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <span class="task-num">0${i+1}</span>
       <span class="task-name">${t.name}</span>
-      <span class="task-time">${t.time}</span>
     </div>`).join('');
 }
 
@@ -676,9 +675,9 @@ async function loadProjectCards() {
       actionHtml = `<button class="project-link-btn join" onclick="openProjectModal('${p.id}')">Express interest</button>`;
     } else {
       actionHtml = `
-        <span style="font-size:12px;color:var(--green);font-weight:500;display:flex;align-items:center;gap:4px;">✓ Interest submitted</span>
-        <a class="project-link-btn" href="${p.when2meet}" target="_blank">📅 When2Meet</a>
-        <a class="project-link-btn" href="${p.chatLink}" target="_blank">💬 Request chat access</a>`;
+        <span style="font-size:12px;color:var(--green);font-weight:500;">Interest submitted</span>
+        <a class="project-link-btn" href="${p.when2meet}" target="_blank">When2Meet</a>
+        <a class="project-link-btn" href="${p.chatLink}" target="_blank">Request chat access</a>`;
       warningHtml = `
         <div class="warn-block" style="margin-top:14px;margin-bottom:0;">
           <p><strong>Action required:</strong> To be considered for this project you must complete the When2Meet and request Google Chat access above. Both are required.</p>
@@ -686,12 +685,7 @@ async function loadProjectCards() {
     }
     return `
       <div class="project-card">
-        <div class="project-card-header">
-          <div>
-            <div class="project-card-title">${p.name}</div>
-            <div style="margin-top:4px;">${p.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}<span style="font-size:11px;color:var(--text-muted);margin-left:6px;">${p.spots} open spot${p.spots!==1?'s':''}</span></div>
-          </div>
-        </div>
+        <div class="project-card-title" style="margin-bottom:10px;">${p.name}</div>
         <div class="project-card-body">${p.tagline}<br><br>${p.description}</div>
         <div class="project-links">${actionHtml}</div>
         ${warningHtml}
@@ -796,7 +790,10 @@ function renderPendingTable(panel) {
   if (!list.length) { panel.innerHTML=`<div class="tracker-wrap"><div class="loading">No pending applications.</div></div>`; return; }
   panel.innerHTML = `
     <div class="tracker-wrap">
-      <div class="tracker-header"><span class="tracker-title">${list.length} pending application${list.length!==1?'s':''}</span></div>
+      <div class="tracker-header">
+        <span class="tracker-title">${list.length} pending application${list.length!==1?'s':''}</span>
+        <button class="btn" onclick="copyEmails(${JSON.stringify(list.map(m=>m.email).filter(Boolean))})">Copy all emails</button>
+      </div>
       <table class="tracker-table">
         <thead><tr><th></th><th>Applicant</th><th>Email</th><th>Returning</th><th>Areas of interest</th><th>Languages</th><th>Action</th></tr></thead>
         <tbody>${list.map(m=>`
@@ -838,10 +835,13 @@ function renderApprovedTable(panel) {
     <div class="tracker-wrap">
       <div class="tracker-header">
         <span class="tracker-title">${list.length} approved member${list.length!==1?'s':''}</span>
-        <button class="btn" onclick="exportCSV()">${CONFIG.lead.exportButton}</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" onclick="copyEmails(${JSON.stringify(list.map(m=>m.email).filter(Boolean))})">Copy all emails</button>
+          <button class="btn" onclick="exportCSV()">${CONFIG.lead.exportButton}</button>
+        </div>
       </div>
       <table class="tracker-table">
-        <thead><tr><th></th><th>Member</th><th>Email</th><th>Project</th><th>Tasks</th><th>Status</th><th>Assign project</th></tr></thead>
+        <thead><tr><th></th><th>Member</th><th>Email</th><th>Tasks</th><th>Status</th><th></th></tr></thead>
         <tbody>${list.map(m=>{
           const done=Object.values(m.tasks||{}).filter(Boolean).length;
           const total=CONFIG.tasks.length;
@@ -852,17 +852,12 @@ function renderApprovedTable(panel) {
             <td style="width:32px;"><button class="expand-btn" onclick="toggleRow('arow-${m.id}')">▶</button></td>
             <td><div class="member-name">${m.name}</div><div class="member-meta">${m.year||'—'}</div></td>
             <td style="font-size:12px;">${m.email||'—'}</td>
-            <td style="font-family:var(--mono);font-size:12px;">${m.project||'—'}</td>
             <td><div class="tasks-dots">${dots}</div></td>
             <td><span class="status-pill ${sc}">${sl}</span></td>
-            <td style="display:flex;gap:6px;align-items:center;">
-              <input class="form-input-inline" id="proj-${m.id}" value="${m.project||''}" placeholder="${CONFIG.lead.assignPlaceholder}">
-              <button class="btn" style="padding:4px 10px;font-size:11px;" onclick="assignProject('${m.id}')">${CONFIG.lead.assignButton}</button>
-              <button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="rejectMember('${m.id}')">Remove</button>
-            </td>
+            <td><button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="rejectMember('${m.id}')">Remove</button></td>
           </tr>
           <tr class="detail-row" id="arow-${m.id}">
-            <td colspan="7" style="padding:0;">
+            <td colspan="6" style="padding:0;">
               <div class="detail-panel">
                 <div class="detail-grid">
                   <div class="detail-field"><div class="detail-label">Major</div><div class="detail-value">${m.major||'—'}</div></div>
@@ -897,6 +892,7 @@ async function renderInterestsTable(panel) {
         <div class="tracker-wrap" style="margin-bottom:20px;">
           <div class="tracker-header">
             <span class="tracker-title">${p.name} <span style="font-weight:400;color:var(--text-muted);">${list.length} interested</span></span>
+            ${list.length>0?`<button class="btn" onclick="copyEmails(${JSON.stringify(list.map(i=>i.email).filter(Boolean))})">Copy emails</button>`:''}
           </div>
           ${list.length===0?`<div class="loading" style="padding:16px;">No submissions yet.</div>`:`
           <table class="tracker-table">
@@ -941,6 +937,15 @@ window.toggleRow = function(rowId) {
   if (btn) btn.textContent = isOpen ? '▼' : '▶';
 };
 
+
+window.copyEmails = function(emails) {
+  const text = emails.join(', ');
+  navigator.clipboard.writeText(text).then(() => {
+    alert(`Copied ${emails.length} email${emails.length!==1?'s':''} to clipboard.`);
+  }).catch(() => {
+    prompt('Copy these emails:', text);
+  });
+};
 
 window.deleteInterest = async function(id, projectId) {
   if (!confirm('Remove this person from the project? This cannot be undone.')) return;
