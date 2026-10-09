@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v2.4 -->
+<!-- DAMP Lab Onboarding v2.5 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1005,12 +1005,45 @@ window.toggleRow = function(rowId) {
 
 window.copyEmails = function(emails) {
   const text = emails.join(', ');
-  navigator.clipboard.writeText(text).then(() => {
-    alert(`Copied ${emails.length} email${emails.length!==1?'s':''} to clipboard.`);
-  }).catch(() => {
-    prompt('Copy these emails:', text);
-  });
+  // Try modern clipboard API first
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      showCopyToast(`Copied ${emails.length} email${emails.length!==1?'s':''}`);
+    }).catch(() => fallbackCopy(text, emails.length));
+  } else {
+    fallbackCopy(text, emails.length);
+  }
 };
+
+function fallbackCopy(text, count) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showCopyToast(`Copied ${count} email${count!==1?'s':''}`);
+  } catch(e) {
+    prompt('Copy these emails:', text);
+  }
+  document.body.removeChild(ta);
+}
+
+function showCopyToast(msg) {
+  let toast = document.getElementById('copy-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'copy-toast';
+    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1a1d23;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;transition:opacity 0.3s;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+}
 
 window.deleteInterest = async function(id, projectId) {
   if (!confirm('Remove this person from the project? This cannot be undone.')) return;
