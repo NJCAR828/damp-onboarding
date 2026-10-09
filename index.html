@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v2.5 -->
+<!-- DAMP Lab Onboarding v2.6 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,7 +154,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 /* Modal */
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
 .modal-overlay.open { display: flex; }
-.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; width: 420px; max-width: 90vw; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; width: 620px; max-width: 95vw; }
 .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
 .modal-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 8px; margin-top: 20px; }
@@ -359,6 +359,7 @@ const db = getFirestore(fbApp);
 emailjs.init(EMAILJS.publicKey);
 
 let sessionEmail = localStorage.getItem('damp_email') || null;
+const emailStore = {}; // stores email lists by key for copy buttons
 let sessionRole = localStorage.getItem('damp_role') || null;
 let myRecord = null;
 let myTasks = {};
@@ -845,11 +846,12 @@ function pName(id) { return CONFIG.projects.find(p=>p.id===id)?.name||id||'—';
 function renderPendingTable(panel) {
   const list = getFilteredMembers().filter(m=>m.status==='pending');
   if (!list.length) { panel.innerHTML=`<div class="tracker-wrap"><div class="loading">No pending applications.</div></div>`; return; }
+  emailStore['pending'] = list.map(m=>m.email).filter(Boolean);
   panel.innerHTML = `
     <div class="tracker-wrap">
       <div class="tracker-header">
         <span class="tracker-title">${list.length} pending application${list.length!==1?'s':''}</span>
-        <button class="btn" onclick="copyEmails(${JSON.stringify(list.map(m=>m.email).filter(Boolean))})">Copy all emails</button>
+        <button class="btn" onclick="copyEmails('pending')">Copy all emails</button>
       </div>
       <table class="tracker-table">
         <thead><tr><th></th><th>Applicant</th><th>Email</th><th>Returning</th><th>Areas of interest</th><th>Languages</th><th>Action</th></tr></thead>
@@ -890,12 +892,13 @@ function renderPendingTable(panel) {
 function renderApprovedTable(panel) {
   const list = getFilteredMembers().filter(m=>m.status==='approved');
   if (!list.length) { panel.innerHTML=`<div class="tracker-wrap"><div class="loading">No approved members yet.</div></div>`; return; }
+  emailStore['approved'] = list.map(m=>m.email).filter(Boolean);
   panel.innerHTML = `
     <div class="tracker-wrap">
       <div class="tracker-header">
         <span class="tracker-title">${list.length} approved member${list.length!==1?'s':''}</span>
         <div style="display:flex;gap:8px;">
-          <button class="btn" onclick="copyEmails(${JSON.stringify(list.map(m=>m.email).filter(Boolean))})">Copy all emails</button>
+          <button class="btn" onclick="copyEmails('approved')">Copy all emails</button>
           <button class="btn" onclick="exportCSV()">${CONFIG.lead.exportButton}</button>
         </div>
       </div>
@@ -949,11 +952,12 @@ async function renderInterestsTable(panel) {
     interests.forEach(i=>{ if(grouped[i.projectId]) grouped[i.projectId].push(i); else grouped['other']=[...(grouped['other']||[]),i]; });
     panel.innerHTML = CONFIG.projects.map(p=>{
       const list = grouped[p.id]||[];
+      emailStore['proj_'+p.id] = list.map(i=>i.email).filter(Boolean);
       return `
         <div class="tracker-wrap" style="margin-bottom:20px;">
           <div class="tracker-header">
             <span class="tracker-title">${p.name} <span style="font-weight:400;color:var(--text-muted);">${list.length} interested</span></span>
-            ${list.length>0?`<button class="btn" onclick="copyEmails(${JSON.stringify(list.map(i=>i.email).filter(Boolean))})">Copy emails</button>`:''}
+            ${list.length>0?`<button class="btn" onclick="copyEmails('proj_${p.id}')">Copy emails</button>`:''}
           </div>
           ${list.length===0?`<div class="loading" style="padding:16px;">No submissions yet.</div>`:`
           <table class="tracker-table">
@@ -1003,10 +1007,11 @@ window.toggleRow = function(rowId) {
 };
 
 
-window.copyEmails = function(emails) {
+window.copyEmails = function(key) {
+  const emails = emailStore[key] || [];
+  if (!emails.length) { showCopyToast('No emails to copy'); return; }
   const text = emails.join(', ');
-  // Try modern clipboard API first
-  if (navigator.clipboard && window.isSecureContext) {
+  if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(() => {
       showCopyToast(`Copied ${emails.length} email${emails.length!==1?'s':''}`);
     }).catch(() => fallbackCopy(text, emails.length));
