@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v2.3 -->
+<!-- DAMP Lab Onboarding v2.4 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -187,6 +187,11 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
       <input class="form-input" id="modal-email" type="email" placeholder="jane@university.edu">
       <div class="form-error" id="modal-e-email">Enter a valid email</div>
     </div>
+    <div class="form-group">
+      <label class="form-label">Why are you interested in this project? Any relevant plans or ideas? <span style="color:var(--accent)">*</span></label>
+      <textarea class="form-textarea" id="modal-why" placeholder="A sentence or two about your interest and what you hope to contribute..."></textarea>
+      <div class="form-error" id="modal-e-why">Required</div>
+    </div>
     <div class="modal-actions">
       <button class="btn" style="flex:1" onclick="closeProjectModal()">Cancel</button>
       <button class="btn primary" style="flex:1" onclick="submitProjectInterest()">Submit interest</button>
@@ -309,7 +314,8 @@ const CONFIG = {
     sectionTitle: 'How we communicate',
     toolsTitle: 'Tools and cadence',
     dayToDay: '[Tool — e.g. Slack] — expected response within 24 hours on weekdays.',
-    weeklyMeeting: '[Day, time, location or link]. Attendance expected unless flagged in advance.',
+    firstMeeting: 'XX/XX/XX at 9:00 AM at CILSE 4XX.',
+    weeklyMeeting: 'Every Wednesday at 9:00 AM in CILSE 4XX. Attendance expected unless flagged in advance.',
     projectWork: 'Tracked in [Notion / GitHub]. Your project lead will walk you through it on day one.',
     contactTitle: 'Who to contact',
     contacts: [
@@ -435,7 +441,7 @@ function renderInterestForm() {
               <label class="form-label">Grad Year <span style="color:var(--accent)">*</span></label>
               <select class="form-select" id="f-year">
                 <option value="">Select year</option>
-                <option>2027</option><option>2028</option><option>2029</option><option>2030</option>
+                <option>2027</option><option>2028</option><option>2029</option><option>2030</option><option>Graduate Student</option>
               </select>
               <div class="form-error" id="e-year">Required</div>
             </div>
@@ -487,6 +493,23 @@ function renderInterestForm() {
               </label>`).join('')}
             </div>
           </div>
+          <div class="form-group">
+            <label class="form-label">How did you hear about the Colonies Program? <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+            <select class="form-select" id="f-referral">
+              <option value="">Select one</option>
+              <option>Friend or classmate</option>
+              <option>Professor or advisor</option>
+              <option>DAMP Lab website</option>
+              <option>Social media</option>
+              <option>Campus flyer or event</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="info-block" style="margin-bottom:18px;">
+            <p>You will receive an email if your application is approved. This may take a few days — bookmark this page and check back anytime.</p>
+          </div>
+
           <button class="btn primary" style="width:100%;padding:11px;margin-top:8px;" onclick="submitForm()">${C.submitButton}</button>
         </div>
       </main>
@@ -524,7 +547,7 @@ window.submitForm = async function() {
   if (!valid) return;
   const existing = await findMemberByEmail(email);
   if (existing) { chk('e-email',false,'This email already has an application.'); return; }
-  const member = { email, name:first+' '+last, year, major, returning, areas, langs:[...document.querySelectorAll('.lang-check:checked')].map(c=>c.value), wetlab, hardware, software, status:'pending', tasks:{}, submittedAt:Date.now() };
+  const member = { email, name:first+' '+last, year, major, returning, areas, langs:[...document.querySelectorAll('.lang-check:checked')].map(c=>c.value), wetlab, hardware, software, referral: document.getElementById('f-referral').value, semester: CONFIG.semester, status:'pending', tasks:{}, submittedAt:Date.now() };
   try {
     await addDoc(collection(db,'members'), member);
     localStorage.setItem('damp_email', email); sessionEmail = email;
@@ -603,7 +626,12 @@ function renderOnboarding() {
           <div class="section-title">${CM.sectionTitle}</div>
           <div class="card">
             <div class="card-title">${CM.toolsTitle}</div>
-            <div class="card-body"><p><strong>Day-to-day:</strong> ${CM.dayToDay}</p><br><p><strong>Weekly meeting:</strong> ${CM.weeklyMeeting}</p><br><p><strong>Project work:</strong> ${CM.projectWork}</p></div>
+            <div class="card-body">
+              <p><strong>First meeting:</strong> ${CM.firstMeeting}</p><br>
+              <p><strong>Weekly meetings:</strong> ${CM.weeklyMeeting}</p><br>
+              <p><strong>Day-to-day:</strong> ${CM.dayToDay}</p><br>
+              <p><strong>Project work:</strong> ${CM.projectWork}</p>
+            </div>
           </div>
           <div class="card blue-bar">
             <div class="card-title">${CM.contactTitle}</div>
@@ -702,8 +730,10 @@ window.openProjectModal = function(projectId) {
   document.getElementById('modal-project-desc').textContent = p.tagline;
   document.getElementById('modal-name').value = myRecord?.name || '';
   document.getElementById('modal-email').value = myRecord?.email || sessionEmail || '';
+  document.getElementById('modal-why').value = '';
   document.getElementById('modal-e-name').classList.remove('show');
   document.getElementById('modal-e-email').classList.remove('show');
+  document.getElementById('modal-e-why').classList.remove('show');
   document.getElementById('project-modal').classList.add('open');
 };
 window.closeProjectModal = function() { document.getElementById('project-modal').classList.remove('open'); };
@@ -714,11 +744,13 @@ window.submitProjectInterest = async function() {
   const email = document.getElementById('modal-email').value.trim();
   let valid = true;
   const chk = (id,cond) => { const el=document.getElementById(id); if(!cond){el.classList.add('show');valid=false;}else el.classList.remove('show'); };
+  const why = document.getElementById('modal-why').value.trim();
   chk('modal-e-name', name);
   chk('modal-e-email', email && email.includes('@'));
+  chk('modal-e-why', why);
   if (!valid) return;
   try {
-    await addDoc(collection(db,'projectInterest'), { name, email, projectId: currentModalProject.id, projectName: currentModalProject.name, submittedAt: Date.now() });
+    await addDoc(collection(db,'projectInterest'), { name, email, why, projectId: currentModalProject.id, projectName: currentModalProject.name, semester: CONFIG.semester, submittedAt: Date.now() });
     // auto-check t4
     if (!myTasks['t4']) {
       myTasks['t4'] = true;
@@ -748,7 +780,16 @@ function renderLeadView() {
       </aside>
       <main class="main">
         <div class="page-title">${C.dashboardTitle}</div>
-        <div class="page-sub" id="lead-sub">Loading...</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+          <div class="page-sub" id="lead-sub" style="margin-bottom:0;">Loading...</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <label style="font-size:12px;color:var(--text-muted);font-weight:500;">Semester:</label>
+            <select class="form-select" id="semester-filter" style="width:160px;padding:6px 10px;font-size:13px;" onchange="renderLeadPanel()">
+              <option value="all">All semesters</option>
+              <option value="${CONFIG.semester}" selected>${CONFIG.semester}</option>
+            </select>
+          </div>
+        </div>
         <div id="lead-panel"><div class="loading">Loading...</div></div>
       </main>
     </div>`;
@@ -758,13 +799,29 @@ function renderLeadView() {
 function subscribeMembers() {
   onSnapshot(collection(db,'members'), snap => {
     allMembers = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const pending = allMembers.filter(m=>m.status==='pending').length;
-    const approved = allMembers.filter(m=>m.status==='approved');
+    // populate semester filter with all known semesters
+    const semesters = [...new Set(allMembers.map(m=>m.semester).filter(Boolean))].sort().reverse();
+    const filter = document.getElementById('semester-filter');
+    if (filter) {
+      const current = filter.value;
+      filter.innerHTML = `<option value="all">All semesters</option>` +
+        semesters.map(s=>`<option value="${s}" ${s===current?'selected':''}>${s}</option>`).join('') +
+        (semesters.includes(CONFIG.semester)?'':` <option value="${CONFIG.semester}" ${CONFIG.semester===current?'selected':''}>${CONFIG.semester}</option>`);
+    }
+    const filtered = getFilteredMembers();
+    const pending = filtered.filter(m=>m.status==='pending').length;
+    const approved = filtered.filter(m=>m.status==='approved');
     const onboarded = approved.filter(m=>Object.values(m.tasks||{}).filter(Boolean).length===CONFIG.tasks.length).length;
     const sub = document.getElementById('lead-sub');
-    if (sub) sub.textContent = `${CONFIG.semester} · ${pending} pending · ${approved.length} approved · ${onboarded} fully onboarded`;
+    if (sub) sub.textContent = `${pending} pending · ${approved.length} approved · ${onboarded} fully onboarded`;
     renderLeadPanel();
   });
+}
+
+function getFilteredMembers() {
+  const filter = document.getElementById('semester-filter')?.value || 'all';
+  if (filter === 'all') return allMembers;
+  return allMembers.filter(m => m.semester === filter);
 }
 
 window.switchTab = function(tab) {
@@ -786,7 +843,7 @@ function renderLeadPanel() {
 function pName(id) { return CONFIG.projects.find(p=>p.id===id)?.name||id||'—'; }
 
 function renderPendingTable(panel) {
-  const list = allMembers.filter(m=>m.status==='pending');
+  const list = getFilteredMembers().filter(m=>m.status==='pending');
   if (!list.length) { panel.innerHTML=`<div class="tracker-wrap"><div class="loading">No pending applications.</div></div>`; return; }
   panel.innerHTML = `
     <div class="tracker-wrap">
@@ -819,6 +876,8 @@ function renderPendingTable(panel) {
                   <div class="detail-field"><div class="detail-label">Returning member</div><div class="detail-value">${m.returning==='yes'?'Yes':'No'}</div></div>
                   <div class="detail-field"><div class="detail-label">Areas of interest</div><div class="detail-value">${(m.areas||[]).join(', ')||'—'}</div></div>
                   <div class="detail-field"><div class="detail-label">Programming languages</div><div class="detail-value">${(m.langs||[]).join(', ')||'—'}</div></div>
+                  <div class="detail-field"><div class="detail-label">How they heard</div><div class="detail-value">${m.referral||'—'}</div></div>
+                  <div class="detail-field"><div class="detail-label">Semester</div><div class="detail-value">${m.semester||'—'}</div></div>
                 </div>
               </div>
             </td>
@@ -829,7 +888,7 @@ function renderPendingTable(panel) {
 }
 
 function renderApprovedTable(panel) {
-  const list = allMembers.filter(m=>m.status==='approved');
+  const list = getFilteredMembers().filter(m=>m.status==='approved');
   if (!list.length) { panel.innerHTML=`<div class="tracker-wrap"><div class="loading">No approved members yet.</div></div>`; return; }
   panel.innerHTML = `
     <div class="tracker-wrap">
@@ -867,6 +926,8 @@ function renderApprovedTable(panel) {
                   <div class="detail-field"><div class="detail-label">Wet lab experience</div><div class="detail-value">${m.wetlab||'—'}</div></div>
                   <div class="detail-field"><div class="detail-label">Hardware experience</div><div class="detail-value">${m.hardware||'—'}</div></div>
                   <div class="detail-field"><div class="detail-label">Software engineering</div><div class="detail-value">${m.software||'—'}</div></div>
+                  <div class="detail-field"><div class="detail-label">Semester</div><div class="detail-value">${m.semester||'—'}</div></div>
+                  <div class="detail-field"><div class="detail-label">How they heard</div><div class="detail-value">${m.referral||'—'}</div></div>
                 </div>
               </div>
             </td>
@@ -896,18 +957,21 @@ async function renderInterestsTable(panel) {
           </div>
           ${list.length===0?`<div class="loading" style="padding:16px;">No submissions yet.</div>`:`
           <table class="tracker-table">
-            <thead><tr><th></th><th>Name</th><th>Email</th><th>Grad Year</th><th>Major</th><th>Submitted</th><th></th></tr></thead>
+            <thead><tr><th></th><th>Name</th><th>Email</th><th>Grad Year</th><th>Major</th><th>Semester</th><th>Submitted</th><th></th></tr></thead>
             <tbody>${list.map((i,idx)=>{
               const m = allMembers.find(m=>m.email===i.email);
-              const detailHtml = m ? `
+              const detailHtml = `
                 <div class="detail-grid">
+                  ${i.why?`<div class="detail-field" style="grid-column:1/-1;"><div class="detail-label">Why interested</div><div class="detail-value">${i.why}</div></div>`:''}
+                  ${m?`
                   <div class="detail-field"><div class="detail-label">Areas of interest</div><div class="detail-value">${(m.areas||[]).join(', ')||'—'}</div></div>
                   <div class="detail-field"><div class="detail-label">Returning member</div><div class="detail-value">${m.returning==='yes'?'Yes':'No'}</div></div>
                   <div class="detail-field"><div class="detail-label">Wet lab experience</div><div class="detail-value">${m.wetlab||'—'}</div></div>
                   <div class="detail-field"><div class="detail-label">Hardware experience</div><div class="detail-value">${m.hardware||'—'}</div></div>
                   <div class="detail-field"><div class="detail-label">Software engineering</div><div class="detail-value">${m.software||'—'}</div></div>
                   <div class="detail-field"><div class="detail-label">Programming languages</div><div class="detail-value">${(m.langs||[]).join(', ')||'—'}</div></div>
-                </div>` : `<div style="font-size:13px;color:var(--text-muted);">No application data found for this email.</div>`;
+                  `:'<div style="font-size:13px;color:var(--text-muted);">No application data found for this email.</div>'}
+                </div>`;
               return `
                 <tr>
                   <td style="width:32px;"><button class="expand-btn" onclick="toggleRow('irow-${p.id}-${idx}')">▶</button></td>
@@ -915,11 +979,12 @@ async function renderInterestsTable(panel) {
                   <td style="font-size:12px;">${i.email}</td>
                   <td style="font-size:12px;">${m?.year||'—'}</td>
                   <td style="font-size:12px;">${m?.major||'—'}</td>
+                  <td style="font-size:11px;color:var(--text-muted);font-family:var(--mono);">${i.semester||'—'}</td>
                   <td style="font-size:11px;color:var(--text-muted);font-family:var(--mono);">${new Date(i.submittedAt).toLocaleDateString()}</td>
                   <td><button class="btn danger" style="padding:4px 10px;font-size:11px;" onclick="deleteInterest('${i.id}','${p.id}')">Remove</button></td>
                 </tr>
                 <tr class="detail-row" id="irow-${p.id}-${idx}">
-                  <td colspan="7" style="padding:0;"><div class="detail-panel">${detailHtml}</div></td>
+                  <td colspan="8" style="padding:0;"><div class="detail-panel">${detailHtml}</div></td>
                 </tr>`;
             }).join('')}
             </tbody>
@@ -972,8 +1037,8 @@ window.assignProject = async function(id) {
 window.leadLogout = function() { localStorage.removeItem('damp_role'); location.reload(); };
 window.exportCSV = function() {
   const list = allMembers.filter(m=>m.status==='approved');
-  const rows=[['Name','Email','Year','Project','Tasks Done','Status']];
-  list.forEach(m=>{ const done=Object.values(m.tasks||{}).filter(Boolean).length; rows.push([m.name,m.email||'',m.year||'',m.project||'',`${done}/${CONFIG.tasks.length}`,done===CONFIG.tasks.length?'Complete':done===0?'Not started':'In progress']); });
+  const rows=[['Name','Email','Year','Semester','Tasks Done','Status']];
+  list.forEach(m=>{ const done=Object.values(m.tasks||{}).filter(Boolean).length; rows.push([m.name,m.email||'',m.year||'',m.semester||'',`${done}/${CONFIG.tasks.length}`,done===CONFIG.tasks.length?'Complete':done===0?'Not started':'In progress']); });
   const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
   const a=document.createElement('a'); a.href='data:text/csv,'+encodeURIComponent(csv); a.download=`damp_cohort_${CONFIG.semester.replace(' ','_')}.csv`; a.click();
 };
