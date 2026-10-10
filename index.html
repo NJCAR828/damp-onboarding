@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v3.0 -->
+<!-- DAMP Lab Onboarding v3.1 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -324,15 +324,13 @@ Your reports directly support the Interface team and help make Canvas better for
       {
         title: 'Useful links',
         body: `<strong>General inquiries:</strong> <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a><br>
-<strong>General Colonies chat:</strong> [link]<br>
 <strong>Meeting notes:</strong> [link]<br>
 <strong>Weekly meeting Zoom:</strong> [link]<br><br>
-<strong>Need swipe access to the lab?</strong> Submit a request below — you will need to provide a brief reason and the project this access is for. Check back on this page to track your status. If your request has been pending for 3 or more days, follow up with Raven Coffer at <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a>.<br><br>
-<div id="swipe-section"></div><br>
-<strong>Important links:</strong><br>
 • <a href="https://www.damplab.org/" target="_blank" style="color:var(--accent);">DAMP Lab website</a><br>
 • <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">DAMP Lab Canvas</a><br>
-• <a href="https://github.com/DAMPLAB" target="_blank" style="color:var(--accent);">DAMP Lab GitHub</a>`,
+• <a href="https://github.com/DAMPLAB" target="_blank" style="color:var(--accent);">DAMP Lab GitHub</a><br><br>
+<strong>Need swipe access to the lab?</strong> Submit a request below. Check back on this page to track your status — it will update once approved. If your request has been pending for 3 or more days, follow up with Raven Coffer at <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a>.<br><br>
+<div id="swipe-section"></div>`,
       },
     ],
   },
@@ -355,7 +353,7 @@ Your reports directly support the Interface team and help make Canvas better for
       chatLink: '[PASTE ROBOTICS GOOGLE CHAT REQUEST LINK HERE]',
       week1tasks: [
         'Sign up for an Opentron training slot: [link]',
-        'Read through the GitHub protocols already established and familiarise yourself with them',
+        'Browse the <a href="https://github.com/DAMPLAB" target="_blank" style="color:var(--accent);">DAMP Lab GitHub</a> — in particular, look at what is under the <strong>OT-Flex</strong> folder to familiarise yourself with existing protocols',
       ],
     },
     {
@@ -372,7 +370,6 @@ Your reports directly support the Interface team and help make Canvas better for
       when2meet: 'https://www.when2meet.com/?39186148-byDpB',
       chatLink: '[PASTE PROTOCOLS GOOGLE CHAT REQUEST LINK HERE]',
       week1tasks: [
-        'Your project lead will share the protocols folder with you in the project chat once you join',
         'Create an account and workspace on <a href="https://protocols.io" target="_blank" style="color:var(--accent);">protocols.io</a> using your BU Google account — once set up, invite ravenc@bu.edu from your workspace',
         'Take a look at the <a href="https://docs.google.com/spreadsheets/d/1juYM2vmDCNiuWw2Z0v92YQtmZxlgQx87lg4HQuvEPKo/edit?usp=sharing" target="_blank" style="color:var(--accent);">Protocol Standardization Guide</a> to get a sense of how protocols are structured',
 
@@ -425,17 +422,10 @@ Your reports directly support the Interface team and help make Canvas better for
   comms: {
     sectionTitle: 'How we communicate',
     toolsTitle: 'Tools and cadence',
-    dayToDay: '[Tool — e.g. Slack] — expected response within 24 hours on weekdays.',
-    firstMeeting: 'XX/XX/XX at 9:00 AM at CILSE 409.',
-    weeklyMeeting: 'Every Wednesday at 9:00 AM in CILSE 409.',
-    projectWork: 'Tracked in [Notion / GitHub]. Your project lead will walk you through it on day one.',
-    contactTitle: 'Who to contact',
-    contacts: [
-      { role: 'General questions', name: '[Name]', contact: '[email or Slack]' },
-      { role: 'Canvas / technical issues', name: '[Name]', contact: '[email or Slack]' },
-      { role: 'Project placement', name: '[Name]', contact: '[email or Slack]' },
-    ],
-    stuckMessage: '',
+    chatNote: 'Most day-to-day communication happens within your project\'s group chat. There is also a general DAMP Lab Colonies chat that all members are part of — join it here: [link].',
+    firstMeeting: 'XX/XX/XX at 9:00 AM in CILSE 409.',
+    weeklyMeetings: 'There are two weekly meetings: a general Colonies meeting that everyone attends, and a project-specific meeting within your own team. Both are held on Wednesdays at 9:00 AM in CILSE 409.',
+    projectWork: 'Project work is tracked in [Notion / GitHub]. Your project lead will walk you through the setup on day one.',
   },
 
   lead: {
@@ -705,10 +695,7 @@ function renderOnboarding() {
         <div class="section" id="tasks">
           <div class="page-title">${C.onboarding.welcomeTitle}${firstName?', '+firstName:''}!</div>
           <div class="page-sub">${C.onboarding.welcomeSubtitle}</div>
-          <div class="progress-wrap">
-            <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
-            <div class="progress-label" id="progress-label">0 / ${C.tasks.length} ${C.onboarding.progressLabel}</div>
-          </div>
+
           <div class="task-list" id="task-list"></div>
         </div>
 
@@ -724,7 +711,7 @@ function renderOnboarding() {
         <div class="section" id="general">
           <div class="section-title">${C.general.sectionTitle}</div>
           <div class="info-block"><p>${C.general.infoText}</p></div>
-          ${C.general.items.map(item=>`<div class="card"><div class="card-title">${item.title}</div><div class="card-body">${item.body}</div></div>`).join('')}
+          ${C.general.items.filter(item=>item.title!=='Useful links').map(item=>`<div class="card"><div class="card-title">${item.title}</div><div class="card-body">${item.body}</div></div>`).join('')}
           <div class="section-complete" id="sc-t2"></div>
         </div>
 
@@ -740,15 +727,22 @@ function renderOnboarding() {
           <div class="card">
             <div class="card-title">${CM.toolsTitle}</div>
             <div class="card-body">
+              <p><strong>Chat:</strong> ${CM.chatNote}</p><br>
               <p><strong>First meeting:</strong> ${CM.firstMeeting}</p><br>
-              <p><strong>Weekly meetings:</strong> ${CM.weeklyMeeting}</p><br>
-              <p><strong>Day-to-day:</strong> ${CM.dayToDay}</p><br>
+              <p><strong>Weekly meetings:</strong> ${CM.weeklyMeetings}</p><br>
               <p><strong>Project work:</strong> ${CM.projectWork}</p>
             </div>
           </div>
-          <div class="card blue-bar">
-            <div class="card-title">${CM.contactTitle}</div>
-            <div class="card-body">${CM.contacts.map(c=>`<p><strong>${c.role}:</strong> ${c.name} — ${c.contact}</p><br>`).join('')}</div>
+          <div class="card blue-bar" id="useful-links-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;">
+              <div style="flex:1;">
+                <div class="card-title" style="margin-bottom:10px;">Useful links</div>
+                <div class="card-body">
+                  ${C.general.items.find(i=>i.title==='Useful links')?.body||''}
+                </div>
+              </div>
+              <img src="logo.png" alt="DAMP Lab" style="height:48px;width:auto;object-fit:contain;flex-shrink:0;opacity:0.85;" onerror="this.style.display='none'">
+            </div>
           </div>
           <div class="section-complete" id="sc-t5"></div>
         </div>
@@ -778,8 +772,8 @@ window.scrollTo2 = id => document.getElementById(id)?.scrollIntoView({behavior:'
 function renderTasks() {
   const tasks = CONFIG.tasks;
   const done = tasks.filter(t=>myTasks[t.id]).length;
-  document.getElementById('progress-fill').style.width = Math.round(done/tasks.length*100)+'%';
-  document.getElementById('progress-label').textContent = `${done} / 5 ${CONFIG.onboarding.progressLabel}`;
+  // progress shown in sticky header bar
+  updateStickyBar();
   document.getElementById('task-list').innerHTML = tasks.map((t,i)=>`
     <div class="task-item ${myTasks[t.id]?'done':''} ${t.locked?'nodot':''}">
       <div class="task-check"><svg width="9" height="7" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
