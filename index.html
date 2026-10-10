@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v2.8 -->
+<!-- DAMP Lab Onboarding v2.9 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -342,7 +342,12 @@ Your reports directly support the Interface team and help make Canvas better for
       id: 'robotics',
       name: 'Robotics',
       tagline: 'Hands-on testing and programming liquid handling robots in the lab.',
-      description: '[Full description: what the project is working on this semester, what stage it is at, what a new contributor would work on in their first two weeks, and what skills are most useful.]',
+      description: '[Add a description of the Robotics project this semester — what is the team currently working toward, and what would a new member be contributing to?]',
+      commonTasks: [
+        'Developing and implementing new automated methods for the Opentron liquid handling robot',
+        'Validating coded methods through water testing protocols and, where appropriate, live biological experiments',
+        'Generating and analysing experimental data to optimise and refine robotic procedures over time',
+      ],
       skills: ['Hardware', 'Python', 'Lab work'],
       spots: 3,
       when2meet: 'https://www.when2meet.com/?39186113-xJYZH',
@@ -357,7 +362,11 @@ Your reports directly support the Interface team and help make Canvas better for
       id: 'protocols',
       name: 'Protocols',
       tagline: 'Drafting and publishing biological protocols utilized by DAMP researchers.',
-      description: '[Full description: what the project is working on this semester, what stage it is at, what a new contributor would work on in their first two weeks, and what skills are most useful.]',
+      description: '[Add a description of the Protocols project this semester — what is the team currently working toward, and what would a new member be contributing to?]',
+      commonTasks: [
+        'Applying the DAMP Lab standardisation guide to author and publish formal molecular biology protocols',
+        'Developing automated protocol counterparts to match the code written by the Robotics team for Opentron execution',
+      ],
       skills: ['Biology', 'Technical writing', 'Research'],
       spots: 3,
       when2meet: 'https://www.when2meet.com/?39186148-byDpB',
@@ -373,7 +382,13 @@ Your reports directly support the Interface team and help make Canvas better for
       id: 'choreography',
       name: 'Choreography',
       tagline: 'Simulating 3D model of lab to optimize its layout and workflow.',
-      description: '[Full description: what the project is working on this semester, what stage it is at, what a new contributor would work on in their first two weeks, and what skills are most useful.]',
+      description: '[Add a description of the Choreography project this semester — what is the team currently working toward, and what would a new member be contributing to?]',
+      commonTasks: [
+        'Optimising the lab user experience through spatial and workflow analysis',
+        'Conducting physical simulations using scaled models to evaluate layout plans and operational timing',
+        'Collaborating with the team at Transfyr — a partner organisation — using in-lab camera systems to inform design decisions',
+        'Assessing the accessibility and feasibility of proposed layout configurations',
+      ],
       skills: ['3D modeling', 'Simulation', 'Systems thinking'],
       spots: 3,
       when2meet: 'https://www.when2meet.com/?39186143-j4cMG',
@@ -386,7 +401,12 @@ Your reports directly support the Interface team and help make Canvas better for
       id: 'interface',
       name: 'Interface',
       tagline: 'Developing full stack architecture for the DAMP Lab Canvas software.',
-      description: '[Full description: what the project is working on this semester, what stage it is at, what a new contributor would work on in their first two weeks, and what skills are most useful.]',
+      description: '[Add a description of the Interface project this semester — what is the team currently working toward, and what would a new member be contributing to?]',
+      commonTasks: [
+        'Identifying, documenting, and resolving bugs within the DAMP Lab Canvas platform',
+        'Participating in monthly testing days dedicated to systematic Canvas evaluation and bug discovery',
+        'Researching comparable platforms — including Amazon Web Services, Benchling, and similar scientific software ecosystems — to inform Canvas development direction',
+      ],
       skills: ['Full stack', 'APIs', 'Software engineering'],
       spots: 3,
       when2meet: 'https://www.when2meet.com/?39186135-keXyQ',
@@ -833,7 +853,18 @@ async function loadProjectCards() {
     return `
       <div class="project-card">
         <div class="project-card-title" style="margin-bottom:10px;">${p.name}</div>
-        <div class="project-card-body">${p.tagline}<br><br>${p.description}</div>
+        <div class="project-card-body">
+          <p style="font-style:italic;color:var(--text-muted);margin-bottom:12px;">${p.tagline}</p>
+          <p style="margin-bottom:16px;">${p.description}</p>
+          <div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Common tasks within this project</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            ${(p.commonTasks||[]).map(t=>`
+            <div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-secondary);line-height:1.5;">
+              <span style="color:var(--blue);margin-top:3px;flex-shrink:0;">—</span>
+              <span>${t}</span>
+            </div>`).join('')}
+          </div>
+        </div>
         <div class="project-links">${actionHtml}</div>
         ${week1Html}
       </div>`;
