@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v2.9 -->
+<!-- DAMP Lab Onboarding v3.0 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,10 +60,10 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .warn-block { border-left: 3px solid var(--accent); background: var(--accent-light); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 14px; }
 .warn-block p { font-size: 13px; color: var(--text-secondary); }
 .progress-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
-.progress-sticky { position: fixed; top: 72px; left: 0; right: 0; z-index: 90; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-.progress-sticky .progress-bar-bg { flex:1; height:4px; background:var(--border); border-radius:10px; overflow:hidden; }
-.progress-sticky .progress-bar-fill { height:100%; background:var(--accent); border-radius:10px; transition:width 0.4s ease; }
-.progress-sticky .progress-label { font-family:var(--mono); font-size:11px; color:var(--text-secondary); white-space:nowrap; }
+.progress-header { display:none; align-items:center; gap:10px; }
+.progress-header .progress-bar-bg { width:120px; height:5px; background:var(--border); border-radius:10px; overflow:hidden; }
+.progress-header .progress-bar-fill { height:100%; background:var(--accent); border-radius:10px; transition:width 0.4s ease; }
+.progress-header .progress-label { font-family:var(--mono); font-size:11px; color:var(--text-secondary); white-space:nowrap; }
 .progress-bar-bg { flex: 1; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; }
 .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width 0.4s ease; }
 .progress-label { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
@@ -171,23 +171,24 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
     <img src="logo.png" alt="DAMP Lab" style="height:44px;width:auto;object-fit:contain;" onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'">
     <span id="logo-fallback" style="display:none;font-family:var(--mono);font-size:14px;font-weight:500;color:var(--accent);letter-spacing:0.04em;">DAMP Lab</span>
   </a>
-  <span class="semester-badge">Fall 2026</span>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <div class="progress-header" id="sticky-progress">
+      <span style="font-size:11px;font-weight:500;color:var(--text-muted);">Progress</span>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="sticky-fill" style="width:0%"></div></div>
+      <span class="progress-label" id="sticky-label">0 / 5</span>
+    </div>
+    <span class="semester-badge">Fall 2026</span>
+  </div>
 </header>
 
 <div id="root"><div class="loading">Loading...</div></div>
 
-<!-- Sticky progress bar (shown after onboarding loads) -->
-<div class="progress-sticky" id="sticky-progress" style="display:none;">
-  <span style="font-size:12px;font-weight:500;color:var(--text-secondary);">Progress</span>
-  <div class="progress-bar-bg"><div class="progress-bar-fill" id="sticky-fill" style="width:0%"></div></div>
-  <span class="progress-label" id="sticky-label">0 / 5 complete</span>
-</div>
 
 <!-- Swipe access modal -->
 <div class="modal-overlay" id="swipe-modal">
   <div class="modal">
     <div class="modal-title">Request lab swipe access</div>
-    <div class="modal-sub">Fill in the details below. You will hear back via email once your request has been reviewed.</div>
+    <div class="modal-sub">Submit your request below. Check back on this page to see your status — it will update to <strong>Swipe Access Granted</strong> once approved.</div>
     <div class="form-group">
       <label class="form-label">Full name <span style="color:var(--accent)">*</span></label>
       <input class="form-input" id="swipe-name" placeholder="Jane Smith">
@@ -199,7 +200,7 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
       <div class="form-error" id="swipe-e-email">Required</div>
     </div>
     <div class="form-group">
-      <label class="form-label">Which project are you on? <span style="color:var(--accent)">*</span></label>
+      <label class="form-label">What project is this access for? <span style="color:var(--accent)">*</span></label>
       <select class="form-select" id="swipe-project">
         <option value="">Select project</option>
         <option>Robotics</option>
@@ -297,7 +298,7 @@ const CONFIG = {
     cardTitle: 'About DAMP Lab',
     paragraph1: 'The DAMP Lab\'s mission is to pioneer the next generation of biotechnology by integrating AI and automation into the specify-design-build-test (SDBT) cycle. We develop novel, formally-represented biological systems and standardized protocols to enable robust, remote bio-cloud operations for researchers worldwide. Our goal is to accelerate scientific discovery, ensuring unprecedented scalability and reproducibility, and packaging these innovations into transferable "Lab in a Box" solutions to guarantee rapid adoption and efficient technology transfer.',
     paragraph2: 'Every semester, the DAMP Lab hosts undergraduates to perform cutting-edge research through our Colonies program. This initiative allows students to shadow and collaborate with full-time DAMP Lab researchers on projects spanning experimental automation, computational infrastructure, and administrative logistics.',
-    paragraph3: 'Want to go deeper? Read the <a href="https://www.nsf.gov/funding/opportunities/pcl-test-bed-test-bed-toward-network-programmable-cloud-laboratories" target="_blank" style="color:var(--accent);">NSF grant synopsis</a> the DAMP Lab is a part of, and a <a href="https://www.chronicle.com/article/the-artificial-scientist?sra=true" target="_blank" style="color:var(--accent);">recent article in The Chronicle of Higher Education</a> about our work.',
+    paragraph3: 'Recommended reading: the <a href="https://www.nsf.gov/funding/opportunities/pcl-test-bed-test-bed-toward-network-programmable-cloud-laboratories" target="_blank" style="color:var(--accent);">NSF grant synopsis</a> the DAMP Lab is part of, and a <a href="https://www.chronicle.com/article/the-artificial-scientist?sra=true" target="_blank" style="color:var(--accent);">recent article in The Chronicle of Higher Education</a> about our work.',
   },
 
   general: {
@@ -307,7 +308,7 @@ const CONFIG = {
       {
         title: 'Using Canvas',
         body: `Canvas is the DAMP Lab\'s own platform for designing biological experiments online — think of it as a digital workspace where you can sequence and configure real lab operations before they are carried out. It is one of the core tools you will interact with regardless of which project you join, so getting comfortable with it early will serve you well.<br><br>
-To get started, head to <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">damplab.sail.codes</a> and sign in with Google using your BU email address. From there, click <strong>Order Operations</strong> and try dragging a few biological operations onto the canvas — each one represents a real experimental step. Do not worry about getting it perfect right away; exploration is encouraged.`,
+To get started, head to <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">damplab.sail.codes</a> and sign in with Google using your BU email address. From there, click <strong>Order Operations</strong> and try dragging a few biological operations onto the canvas — each one represents a real experimental step.`,
       },
       {
         title: 'Reporting a bug',
@@ -326,7 +327,7 @@ Your reports directly support the Interface team and help make Canvas better for
 <strong>General Colonies chat:</strong> [link]<br>
 <strong>Meeting notes:</strong> [link]<br>
 <strong>Weekly meeting Zoom:</strong> [link]<br><br>
-<strong>Need swipe access to the lab?</strong> Use the button below to submit a request. You will need to provide a brief reason and the project you are working on. Your status will show as <strong>Pending</strong> until access is granted — once approved it will update to <strong>Swipe Access Granted</strong>. If your status has been pending for 3 or more days, follow up with Raven Coffer at <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a>.<br><br>
+<strong>Need swipe access to the lab?</strong> Submit a request below — you will need to provide a brief reason and the project this access is for. Check back on this page to track your status. If your request has been pending for 3 or more days, follow up with Raven Coffer at <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a>.<br><br>
 <div id="swipe-section"></div><br>
 <strong>Important links:</strong><br>
 • <a href="https://www.damplab.org/" target="_blank" style="color:var(--accent);">DAMP Lab website</a><br>
@@ -354,7 +355,6 @@ Your reports directly support the Interface team and help make Canvas better for
       chatLink: '[PASTE ROBOTICS GOOGLE CHAT REQUEST LINK HERE]',
       week1tasks: [
         'Sign up for an Opentron training slot: [link]',
-        'In your first meeting: learn basic coding commands for the Opentron',
         'Read through the GitHub protocols already established and familiarise yourself with them',
       ],
     },
@@ -375,7 +375,7 @@ Your reports directly support the Interface team and help make Canvas better for
         'Your project lead will share the protocols folder with you in the project chat once you join',
         'Create an account and workspace on <a href="https://protocols.io" target="_blank" style="color:var(--accent);">protocols.io</a> using your BU Google account — once set up, invite ravenc@bu.edu from your workspace',
         'Take a look at the <a href="https://docs.google.com/spreadsheets/d/1juYM2vmDCNiuWw2Z0v92YQtmZxlgQx87lg4HQuvEPKo/edit?usp=sharing" target="_blank" style="color:var(--accent);">Protocol Standardization Guide</a> to get a sense of how protocols are structured',
-        'Your first meeting will cover the full workflow: how protocols are approved, where to write them, which ones to start with, and a simple runthrough',
+
       ],
     },
     {
@@ -427,7 +427,7 @@ Your reports directly support the Interface team and help make Canvas better for
     toolsTitle: 'Tools and cadence',
     dayToDay: '[Tool — e.g. Slack] — expected response within 24 hours on weekdays.',
     firstMeeting: 'XX/XX/XX at 9:00 AM at CILSE 409.',
-    weeklyMeeting: 'Every Wednesday at 9:00 AM in CILSE 409. Attendance expected unless flagged in advance.',
+    weeklyMeeting: 'Every Wednesday at 9:00 AM in CILSE 409.',
     projectWork: 'Tracked in [Notion / GitHub]. Your project lead will walk you through it on day one.',
     contactTitle: 'Who to contact',
     contacts: [
@@ -830,7 +830,10 @@ async function loadProjectCards() {
       actionHtml = `<button class="project-link-btn join" onclick="openProjectModal('${p.id}')">Express interest</button>`;
     } else {
       actionHtml = `
-        <span style="font-size:12px;color:var(--green);font-weight:500;">Interest submitted</span>
+        <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--green);background:var(--green-light);border:1.5px solid var(--green-border);padding:5px 12px;border-radius:20px;">
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Interest submitted
+        </span>
         <a class="project-link-btn" href="${p.when2meet}" target="_blank">When2Meet</a>
         <a class="project-link-btn" href="${p.chatLink}" target="_blank">Request chat access</a>`;
       const warningHtml = `
@@ -843,8 +846,8 @@ async function loadProjectCards() {
           <div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Week 1 tasks</div>
           <div style="display:flex;flex-direction:column;gap:8px;">
             ${(p.week1tasks||[]).map(t=>`
-            <div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-secondary);line-height:1.5;">
-              <span style="color:var(--accent);margin-top:2px;flex-shrink:0;">→</span>
+            <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-secondary);line-height:1.5;">
+              <span style="color:var(--accent);margin-top:4px;flex-shrink:0;font-size:8px;">●</span>
               <span>${t}</span>
             </div>`).join('')}
           </div>
@@ -859,8 +862,8 @@ async function loadProjectCards() {
           <div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Common tasks within this project</div>
           <div style="display:flex;flex-direction:column;gap:7px;">
             ${(p.commonTasks||[]).map(t=>`
-            <div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-secondary);line-height:1.5;">
-              <span style="color:var(--blue);margin-top:3px;flex-shrink:0;">—</span>
+            <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text-secondary);line-height:1.5;">
+              <span style="color:var(--blue);margin-top:4px;flex-shrink:0;font-size:8px;">●</span>
               <span>${t}</span>
             </div>`).join('')}
           </div>
@@ -1278,7 +1281,7 @@ async function renderSwipeTable(panel) {
         <td>
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;">
-              <input type="checkbox" ${r.emailSent?'checked':''} onchange="updateSwipe('${r.id}','emailSent',this.checked)" style="accent-color:var(--accent);"> Email sent
+              <input type="checkbox" ${r.emailSent?'checked':''} onchange="updateSwipe('${r.id}','emailSent',this.checked)" style="accent-color:var(--accent);"> Access requested
             </label>
             <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;">
               <input type="checkbox" ${r.accessGranted?'checked':''} onchange="updateSwipe('${r.id}','accessGranted',this.checked)" style="accent-color:var(--green);"> Access granted
@@ -1287,7 +1290,7 @@ async function renderSwipeTable(panel) {
         </td>
         <td>
           <span class="status-pill ${r.accessGranted?'complete':r.emailSent?'inprogress':'notstarted'}">
-            ${r.accessGranted?'Granted':r.emailSent?'Email sent':'Pending'}
+            ${r.accessGranted?'Granted':r.emailSent?'Requested':'Pending'}
           </span>
         </td>
       </tr>`).join('');
