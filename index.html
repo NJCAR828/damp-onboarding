@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v2.6 -->
+<!-- DAMP Lab Onboarding v2.7 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -255,9 +255,38 @@ const CONFIG = {
     sectionTitle: 'What everyone should know',
     infoText: 'This section covers the essentials every lab member needs before starting — regardless of project.',
     items: [
-      { title: '[Topic 1]', body: '[Content coming after director meeting — add key info here.]' },
-      { title: '[Topic 2]', body: '[Content coming after director meeting — add key info here.]' },
-      { title: '[Topic 3]', body: '[Content coming after director meeting — add key info here.]' },
+      {
+        title: 'Using Canvas',
+        body: `Canvas is the DAMP Lab\'s platform for designing and ordering biological experiments online.<br><br>
+<strong>Getting started:</strong><br>
+1. Go to <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">damplab.sail.codes</a><br>
+2. Sign in with Google — use your BU address<br>
+3. Click <strong>Order Operations</strong><br>
+4. Drag biological operations onto the canvas to construct workflows<br><br>
+<em>Think of it as setting up an experiment online. Each operation on the canvas represents a real biological step.</em>`,
+      },
+      {
+        title: 'Reporting a bug',
+        body: `When you find something that doesn\'t work correctly in Canvas, report it:<br><br>
+1. Go back to the Canvas homepage (<a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">damplab.sail.codes</a>)<br>
+2. Click <strong>Bugs</strong><br>
+3. Click <strong>Report a bug</strong><br>
+4. Toggle the severity: <strong>Minor, Major, Blocker,</strong> or <strong>Cosmetic</strong><br>
+5. Describe what happened<br>
+6. Optionally provide steps to reproduce (this helps the software team a lot)<br>
+7. Attach a screenshot if helpful`,
+      },
+      {
+        title: 'Communication & important links',
+        body: `<strong>General inquiries:</strong> Contact <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a><br>
+<strong>General chat:</strong> Join the DAMP Lab Colonies Google Chat: [link]<br><br>
+<strong>Important links:</strong><br>
+• <a href="https://www.damplab.org/" target="_blank" style="color:var(--accent);">DAMP Lab website</a><br>
+• <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">DAMP Lab Canvas</a><br>
+• <a href="https://github.com/DAMPLAB" target="_blank" style="color:var(--accent);">DAMP Lab GitHub</a><br>
+• Meeting notes: [link]<br>
+• Weekly meeting Zoom: [link]`,
+      },
     ],
   },
 
@@ -272,6 +301,12 @@ const CONFIG = {
       spots: 3,
       when2meet: '[PASTE ROBOTICS WHEN2MEET LINK HERE]',
       chatLink: '[PASTE ROBOTICS GOOGLE CHAT REQUEST LINK HERE]',
+      week1tasks: [
+        'Get Opentron training',
+        'Get swipe access to the lab',
+        'In your first meeting: learn basic coding commands for the Opentron',
+        'Read through the GitHub protocols already established and familiarise yourself with them',
+      ],
     },
     {
       id: 'protocols',
@@ -282,6 +317,13 @@ const CONFIG = {
       spots: 3,
       when2meet: '[PASTE PROTOCOLS WHEN2MEET LINK HERE]',
       chatLink: '[PASTE PROTOCOLS GOOGLE CHAT REQUEST LINK HERE]',
+      week1tasks: [
+        'The protocols folder will be shared in your project chat — review it',
+        'Create an account and workspace on <a href="https://protocols.io" target="_blank" style="color:var(--accent);">protocols.io</a> using your BU Google account',
+        'On your protocols.io workspace, click Invite People and invite ravenc@bu.edu',
+        'Read through the <a href="https://docs.google.com/spreadsheets/d/1juYM2vmDCNiuWw2Z0v92YQtmZxlgQx87lg4HQuvEPKo/edit?usp=sharing" target="_blank" style="color:var(--accent);">Protocol Standardization Guide</a>',
+        'First meeting tasks: learn the workflow, how protocols are approved, where to write them, which to write, and a simple runthrough',
+      ],
     },
     {
       id: 'choreography',
@@ -292,6 +334,10 @@ const CONFIG = {
       spots: 3,
       when2meet: '[PASTE CHOREOGRAPHY WHEN2MEET LINK HERE]',
       chatLink: '[PASTE CHOREOGRAPHY GOOGLE CHAT REQUEST LINK HERE]',
+      week1tasks: [
+        'Get Opentron training',
+        'Get swipe access to the lab',
+      ],
     },
     {
       id: 'interface',
@@ -302,6 +348,9 @@ const CONFIG = {
       spots: 3,
       when2meet: '[PASTE INTERFACE WHEN2MEET LINK HERE]',
       chatLink: '[PASTE INTERFACE GOOGLE CHAT REQUEST LINK HERE]',
+      week1tasks: [
+        '[Week 1 tasks for Interface coming soon — check back after your first meeting]',
+      ],
     },
   ],
 
@@ -699,7 +748,7 @@ async function loadProjectCards() {
   container.innerHTML = CONFIG.projects.map(p => {
     const interest = myInterests[p.id];
     let actionHtml = '';
-    let warningHtml = '';
+    let week1Html = '';
     if (!interest) {
       actionHtml = `<button class="project-link-btn join" onclick="openProjectModal('${p.id}')">Express interest</button>`;
     } else {
@@ -707,9 +756,21 @@ async function loadProjectCards() {
         <span style="font-size:12px;color:var(--green);font-weight:500;">Interest submitted</span>
         <a class="project-link-btn" href="${p.when2meet}" target="_blank">When2Meet</a>
         <a class="project-link-btn" href="${p.chatLink}" target="_blank">Request chat access</a>`;
-      warningHtml = `
+      const warningHtml = `
         <div class="warn-block" style="margin-top:14px;margin-bottom:0;">
           <p><strong>Action required:</strong> To be considered for this project you must complete the When2Meet and request Google Chat access above. Both are required.</p>
+        </div>`;
+      week1Html = `
+        ${warningHtml}
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+          <div style="font-size:12px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Week 1 tasks</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${(p.week1tasks||[]).map(t=>`
+            <div style="display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-secondary);line-height:1.5;">
+              <span style="color:var(--accent);margin-top:2px;flex-shrink:0;">→</span>
+              <span>${t}</span>
+            </div>`).join('')}
+          </div>
         </div>`;
     }
     return `
@@ -717,7 +778,7 @@ async function loadProjectCards() {
         <div class="project-card-title" style="margin-bottom:10px;">${p.name}</div>
         <div class="project-card-body">${p.tagline}<br><br>${p.description}</div>
         <div class="project-links">${actionHtml}</div>
-        ${warningHtml}
+        ${week1Html}
       </div>`;
   }).join('');
 }
