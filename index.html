@@ -1,4 +1,4 @@
-<!-- DAMP Lab Onboarding v2.7 -->
+<!-- DAMP Lab Onboarding v2.8 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,6 +60,10 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 .warn-block { border-left: 3px solid var(--accent); background: var(--accent-light); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 14px; }
 .warn-block p { font-size: 13px; color: var(--text-secondary); }
 .progress-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+.progress-sticky { position: fixed; top: 72px; left: 0; right: 0; z-index: 90; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 32px; display: flex; align-items: center; gap: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.progress-sticky .progress-bar-bg { flex:1; height:4px; background:var(--border); border-radius:10px; overflow:hidden; }
+.progress-sticky .progress-bar-fill { height:100%; background:var(--accent); border-radius:10px; transition:width 0.4s ease; }
+.progress-sticky .progress-label { font-family:var(--mono); font-size:11px; color:var(--text-secondary); white-space:nowrap; }
 .progress-bar-bg { flex: 1; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; }
 .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width 0.4s ease; }
 .progress-label { font-family: var(--mono); font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
@@ -172,6 +176,51 @@ body { font-family: var(--sans); background: var(--bg); color: var(--text); font
 
 <div id="root"><div class="loading">Loading...</div></div>
 
+<!-- Sticky progress bar (shown after onboarding loads) -->
+<div class="progress-sticky" id="sticky-progress" style="display:none;">
+  <span style="font-size:12px;font-weight:500;color:var(--text-secondary);">Progress</span>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="sticky-fill" style="width:0%"></div></div>
+  <span class="progress-label" id="sticky-label">0 / 5 complete</span>
+</div>
+
+<!-- Swipe access modal -->
+<div class="modal-overlay" id="swipe-modal">
+  <div class="modal">
+    <div class="modal-title">Request lab swipe access</div>
+    <div class="modal-sub">Fill in the details below. You will hear back via email once your request has been reviewed.</div>
+    <div class="form-group">
+      <label class="form-label">Full name <span style="color:var(--accent)">*</span></label>
+      <input class="form-input" id="swipe-name" placeholder="Jane Smith">
+      <div class="form-error" id="swipe-e-name">Required</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">School email <span style="color:var(--accent)">*</span></label>
+      <input class="form-input" id="swipe-email" type="email" placeholder="jane@bu.edu">
+      <div class="form-error" id="swipe-e-email">Required</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Which project are you on? <span style="color:var(--accent)">*</span></label>
+      <select class="form-select" id="swipe-project">
+        <option value="">Select project</option>
+        <option>Robotics</option>
+        <option>Protocols</option>
+        <option>Choreography</option>
+        <option>Interface</option>
+      </select>
+      <div class="form-error" id="swipe-e-project">Required</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Why do you need lab access? <span style="color:var(--accent)">*</span></label>
+      <textarea class="form-textarea" id="swipe-reason" placeholder="Briefly describe why you need access and what you will be doing in the lab..."></textarea>
+      <div class="form-error" id="swipe-e-reason">Required</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" style="flex:1" onclick="closeSwipeModal()">Cancel</button>
+      <button class="btn primary" style="flex:1" onclick="submitSwipeRequest()">Submit request</button>
+    </div>
+  </div>
+</div>
+
 <!-- Project interest modal -->
 <div class="modal-overlay" id="project-modal">
   <div class="modal">
@@ -246,9 +295,9 @@ const CONFIG = {
   whoWeAre: {
     sectionTitle: 'Who we are',
     cardTitle: 'About DAMP Lab',
-    paragraph1: 'DAMP Lab is a student-led research and build group focused on [your mission here]. Each semester we take on a cohort of 10–20 undergraduates who contribute to active projects or propose their own.',
-    paragraph2: 'We work at the intersection of research and engineering — that means you\'ll write code, run experiments, and ship things that matter. Past cohort members have [highlight: published, presented at X, built Y].',
-    paragraph3: 'What to expect this semester: You\'ll find or create a project in week one, make your first contribution by week two, and have a defined role by week three.',
+    paragraph1: 'The DAMP Lab\'s mission is to pioneer the next generation of biotechnology by integrating AI and automation into the specify-design-build-test (SDBT) cycle. We develop novel, formally-represented biological systems and standardized protocols to enable robust, remote bio-cloud operations for researchers worldwide. Our goal is to accelerate scientific discovery, ensuring unprecedented scalability and reproducibility, and packaging these innovations into transferable "Lab in a Box" solutions to guarantee rapid adoption and efficient technology transfer.',
+    paragraph2: 'Every semester, the DAMP Lab hosts undergraduates to perform cutting-edge research through our Colonies program. This initiative allows students to shadow and collaborate with full-time DAMP Lab researchers on projects spanning experimental automation, computational infrastructure, and administrative logistics.',
+    paragraph3: 'Want to go deeper? Read the <a href="https://www.nsf.gov/funding/opportunities/pcl-test-bed-test-bed-toward-network-programmable-cloud-laboratories" target="_blank" style="color:var(--accent);">NSF grant synopsis</a> the DAMP Lab is a part of, and a <a href="https://www.chronicle.com/article/the-artificial-scientist?sra=true" target="_blank" style="color:var(--accent);">recent article in The Chronicle of Higher Education</a> about our work.',
   },
 
   general: {
@@ -257,35 +306,32 @@ const CONFIG = {
     items: [
       {
         title: 'Using Canvas',
-        body: `Canvas is the DAMP Lab\'s platform for designing and ordering biological experiments online.<br><br>
-<strong>Getting started:</strong><br>
-1. Go to <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">damplab.sail.codes</a><br>
-2. Sign in with Google — use your BU address<br>
-3. Click <strong>Order Operations</strong><br>
-4. Drag biological operations onto the canvas to construct workflows<br><br>
-<em>Think of it as setting up an experiment online. Each operation on the canvas represents a real biological step.</em>`,
+        body: `Canvas is the DAMP Lab\'s own platform for designing biological experiments online — think of it as a digital workspace where you can sequence and configure real lab operations before they are carried out. It is one of the core tools you will interact with regardless of which project you join, so getting comfortable with it early will serve you well.<br><br>
+To get started, head to <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">damplab.sail.codes</a> and sign in with Google using your BU email address. From there, click <strong>Order Operations</strong> and try dragging a few biological operations onto the canvas — each one represents a real experimental step. Do not worry about getting it perfect right away; exploration is encouraged.`,
       },
       {
         title: 'Reporting a bug',
-        body: `When you find something that doesn\'t work correctly in Canvas, report it:<br><br>
-1. Go back to the Canvas homepage (<a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">damplab.sail.codes</a>)<br>
-2. Click <strong>Bugs</strong><br>
-3. Click <strong>Report a bug</strong><br>
-4. Toggle the severity: <strong>Minor, Major, Blocker,</strong> or <strong>Cosmetic</strong><br>
-5. Describe what happened<br>
-6. Optionally provide steps to reproduce (this helps the software team a lot)<br>
-7. Attach a screenshot if helpful`,
+        body: `As a Colonies member, one of your most valuable contributions is helping improve Canvas by catching things that do not work as expected. When you notice something off, here is how to report it:<br><br>
+1. Return to the Canvas homepage at <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">damplab.sail.codes</a><br>
+2. Click <strong>Bugs</strong>, then <strong>Report a bug</strong><br>
+3. Select the severity — <strong>Minor, Major, Blocker,</strong> or <strong>Cosmetic</strong><br>
+4. Describe what you observed<br>
+5. If you can, include steps to reproduce the issue — this is especially helpful for the software team<br>
+6. Attach a screenshot if it adds context<br><br>
+Your reports directly support the Interface team and help make Canvas better for researchers everywhere.`,
       },
       {
-        title: 'Communication & important links',
-        body: `<strong>General inquiries:</strong> Contact <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a><br>
-<strong>General chat:</strong> Join the DAMP Lab Colonies Google Chat: [link]<br><br>
+        title: 'Useful links',
+        body: `<strong>General inquiries:</strong> <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a><br>
+<strong>General Colonies chat:</strong> [link]<br>
+<strong>Meeting notes:</strong> [link]<br>
+<strong>Weekly meeting Zoom:</strong> [link]<br><br>
+<strong>Need swipe access to the lab?</strong> Use the button below to submit a request. You will need to provide a brief reason and the project you are working on. Your status will show as <strong>Pending</strong> until access is granted — once approved it will update to <strong>Swipe Access Granted</strong>. If your status has been pending for 3 or more days, follow up with Raven Coffer at <a href="mailto:ravenc@bu.edu" style="color:var(--accent);">ravenc@bu.edu</a>.<br><br>
+<div id="swipe-section"></div><br>
 <strong>Important links:</strong><br>
 • <a href="https://www.damplab.org/" target="_blank" style="color:var(--accent);">DAMP Lab website</a><br>
 • <a href="https://damplab.sail.codes/" target="_blank" style="color:var(--accent);">DAMP Lab Canvas</a><br>
-• <a href="https://github.com/DAMPLAB" target="_blank" style="color:var(--accent);">DAMP Lab GitHub</a><br>
-• Meeting notes: [link]<br>
-• Weekly meeting Zoom: [link]`,
+• <a href="https://github.com/DAMPLAB" target="_blank" style="color:var(--accent);">DAMP Lab GitHub</a>`,
       },
     ],
   },
@@ -299,11 +345,10 @@ const CONFIG = {
       description: '[Full description: what the project is working on this semester, what stage it is at, what a new contributor would work on in their first two weeks, and what skills are most useful.]',
       skills: ['Hardware', 'Python', 'Lab work'],
       spots: 3,
-      when2meet: '[PASTE ROBOTICS WHEN2MEET LINK HERE]',
+      when2meet: 'https://www.when2meet.com/?39186113-xJYZH',
       chatLink: '[PASTE ROBOTICS GOOGLE CHAT REQUEST LINK HERE]',
       week1tasks: [
-        'Get Opentron training',
-        'Get swipe access to the lab',
+        'Sign up for an Opentron training slot: [link]',
         'In your first meeting: learn basic coding commands for the Opentron',
         'Read through the GitHub protocols already established and familiarise yourself with them',
       ],
@@ -315,14 +360,13 @@ const CONFIG = {
       description: '[Full description: what the project is working on this semester, what stage it is at, what a new contributor would work on in their first two weeks, and what skills are most useful.]',
       skills: ['Biology', 'Technical writing', 'Research'],
       spots: 3,
-      when2meet: '[PASTE PROTOCOLS WHEN2MEET LINK HERE]',
+      when2meet: 'https://www.when2meet.com/?39186148-byDpB',
       chatLink: '[PASTE PROTOCOLS GOOGLE CHAT REQUEST LINK HERE]',
       week1tasks: [
-        'The protocols folder will be shared in your project chat — review it',
-        'Create an account and workspace on <a href="https://protocols.io" target="_blank" style="color:var(--accent);">protocols.io</a> using your BU Google account',
-        'On your protocols.io workspace, click Invite People and invite ravenc@bu.edu',
-        'Read through the <a href="https://docs.google.com/spreadsheets/d/1juYM2vmDCNiuWw2Z0v92YQtmZxlgQx87lg4HQuvEPKo/edit?usp=sharing" target="_blank" style="color:var(--accent);">Protocol Standardization Guide</a>',
-        'First meeting tasks: learn the workflow, how protocols are approved, where to write them, which to write, and a simple runthrough',
+        'Your project lead will share the protocols folder with you in the project chat once you join',
+        'Create an account and workspace on <a href="https://protocols.io" target="_blank" style="color:var(--accent);">protocols.io</a> using your BU Google account — once set up, invite ravenc@bu.edu from your workspace',
+        'Take a look at the <a href="https://docs.google.com/spreadsheets/d/1juYM2vmDCNiuWw2Z0v92YQtmZxlgQx87lg4HQuvEPKo/edit?usp=sharing" target="_blank" style="color:var(--accent);">Protocol Standardization Guide</a> to get a sense of how protocols are structured',
+        'Your first meeting will cover the full workflow: how protocols are approved, where to write them, which ones to start with, and a simple runthrough',
       ],
     },
     {
@@ -332,11 +376,10 @@ const CONFIG = {
       description: '[Full description: what the project is working on this semester, what stage it is at, what a new contributor would work on in their first two weeks, and what skills are most useful.]',
       skills: ['3D modeling', 'Simulation', 'Systems thinking'],
       spots: 3,
-      when2meet: '[PASTE CHOREOGRAPHY WHEN2MEET LINK HERE]',
+      when2meet: 'https://www.when2meet.com/?39186143-j4cMG',
       chatLink: '[PASTE CHOREOGRAPHY GOOGLE CHAT REQUEST LINK HERE]',
       week1tasks: [
-        'Get Opentron training',
-        'Get swipe access to the lab',
+        'Sign up for an Opentron training slot: [link]',
       ],
     },
     {
@@ -346,7 +389,7 @@ const CONFIG = {
       description: '[Full description: what the project is working on this semester, what stage it is at, what a new contributor would work on in their first two weeks, and what skills are most useful.]',
       skills: ['Full stack', 'APIs', 'Software engineering'],
       spots: 3,
-      when2meet: '[PASTE INTERFACE WHEN2MEET LINK HERE]',
+      when2meet: 'https://www.when2meet.com/?39186135-keXyQ',
       chatLink: '[PASTE INTERFACE GOOGLE CHAT REQUEST LINK HERE]',
       week1tasks: [
         '[Week 1 tasks for Interface coming soon — check back after your first meeting]',
@@ -356,15 +399,15 @@ const CONFIG = {
 
   projectsSection: {
     sectionTitle: 'Active projects',
-    infoText: 'Read through each project below. When you\'re ready to join one, click "Express interest" — this submits your name and email to the project lead and gives you links to schedule availability and request chat access.',
+    infoText: 'Read through each project below. When you\'re ready to join one, click "Express interest" — this submits your name and email to the project lead.',
   },
 
   comms: {
     sectionTitle: 'How we communicate',
     toolsTitle: 'Tools and cadence',
     dayToDay: '[Tool — e.g. Slack] — expected response within 24 hours on weekdays.',
-    firstMeeting: 'XX/XX/XX at 9:00 AM at CILSE 4XX.',
-    weeklyMeeting: 'Every Wednesday at 9:00 AM in CILSE 4XX. Attendance expected unless flagged in advance.',
+    firstMeeting: 'XX/XX/XX at 9:00 AM at CILSE 409.',
+    weeklyMeeting: 'Every Wednesday at 9:00 AM in CILSE 409. Attendance expected unless flagged in advance.',
     projectWork: 'Tracked in [Notion / GitHub]. Your project lead will walk you through it on day one.',
     contactTitle: 'Who to contact',
     contacts: [
@@ -372,7 +415,7 @@ const CONFIG = {
       { role: 'Canvas / technical issues', name: '[Name]', contact: '[email or Slack]' },
       { role: 'Project placement', name: '[Name]', contact: '[email or Slack]' },
     ],
-    stuckMessage: 'Stuck for more than an hour? Ask. Don\'t spiral.',
+    stuckMessage: '',
   },
 
   lead: {
@@ -633,7 +676,7 @@ function renderOnboarding() {
           <li><a onclick="scrollTo2('who-we-are')">Who we are</a></li>
           <li><a onclick="scrollTo2('general')">What everyone should know</a></li>
           <li><a onclick="scrollTo2('projects')">Projects</a></li>
-          <li><a onclick="scrollTo2('comms')">How we communicate</a></li>
+          <li><a onclick="scrollTo2('comms')">Communication & links</a></li>
         </ul>
         <div class="sidebar-section">Account</div>
         <ul class="sidebar-nav"><li><a onclick="localStorage.removeItem('damp_email');location.reload()">Sign out</a></li></ul>
@@ -653,7 +696,7 @@ function renderOnboarding() {
           <div class="section-title">${W.sectionTitle}</div>
           <div class="card blue-bar">
             <div class="card-title">${W.cardTitle}</div>
-            <div class="card-body"><p>${W.paragraph1}</p><br><p>${W.paragraph2}</p><br><p><strong>${W.paragraph3}</strong></p></div>
+            <div class="card-body"><p>${W.paragraph1}</p><br><p>${W.paragraph2}</p><br><p>${W.paragraph3}</p></div>
           </div>
           <div class="section-complete" id="sc-t1"></div>
         </div>
@@ -685,7 +728,7 @@ function renderOnboarding() {
           </div>
           <div class="card blue-bar">
             <div class="card-title">${CM.contactTitle}</div>
-            <div class="card-body">${CM.contacts.map(c=>`<p><strong>${c.role}:</strong> ${c.name} — ${c.contact}</p><br>`).join('')}<p><strong>${CM.stuckMessage}</strong></p></div>
+            <div class="card-body">${CM.contacts.map(c=>`<p><strong>${c.role}:</strong> ${c.name} — ${c.contact}</p><br>`).join('')}</div>
           </div>
           <div class="section-complete" id="sc-t5"></div>
         </div>
@@ -694,6 +737,20 @@ function renderOnboarding() {
   renderTasks();
   renderSectionButtons();
   loadProjectCards();
+  // show sticky bar
+  document.getElementById('sticky-progress').style.display = 'flex';
+  updateStickyBar();
+  // render swipe section
+  renderSwipeSection();
+}
+
+function updateStickyBar() {
+  const done = CONFIG.tasks.filter(t=>myTasks[t.id]).length;
+  const pct = Math.round(done/CONFIG.tasks.length*100);
+  const sf = document.getElementById('sticky-fill');
+  const sl = document.getElementById('sticky-label');
+  if (sf) sf.style.width = pct+'%';
+  if (sl) sl.textContent = `${done} / 5 complete`;
 }
 
 window.scrollTo2 = id => document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
@@ -721,7 +778,7 @@ function renderSectionButtons() {
 }
 
 window.toggleTask = async function(id) {
-  myTasks[id] = !myTasks[id]; renderTasks(); renderSectionButtons();
+  myTasks[id] = !myTasks[id]; renderTasks(); renderSectionButtons(); updateStickyBar();
   if (myRecord) { try { await updateDoc(doc(db,'members',myRecord.id),{tasks:myTasks}); } catch(e){} }
 };
 
@@ -819,6 +876,7 @@ window.submitProjectInterest = async function() {
       if (myRecord) { try { await updateDoc(doc(db,'members',myRecord.id),{tasks:myTasks}); } catch(e){} }
       renderTasks();
       renderSectionButtons();
+      updateStickyBar();
     }
     closeProjectModal();
     loadProjectCards();
@@ -836,6 +894,7 @@ function renderLeadView() {
           <li><a onclick="switchTab('pending')" id="nav-pending" class="active">Pending</a></li>
           <li><a onclick="switchTab('approved')" id="nav-approved">Approved</a></li>
           <li><a onclick="switchTab('interests')" id="nav-interests">Project interests</a></li>
+          <li><a onclick="switchTab('swipe')" id="nav-swipe">Swipe requests</a></li>
         </ul>
         <div class="sidebar-section">Account</div>
         <ul class="sidebar-nav"><li><a onclick="leadLogout()">Sign out</a></li></ul>
@@ -888,7 +947,7 @@ function getFilteredMembers() {
 
 window.switchTab = function(tab) {
   leadTab = tab;
-  ['pending','approved','interests'].forEach(t => {
+  ['pending','approved','interests','swipe'].forEach(t => {
     const el = document.getElementById('nav-'+t);
     if (el) el.classList.toggle('active', t===tab);
   });
@@ -899,7 +958,8 @@ function renderLeadPanel() {
   const panel = document.getElementById('lead-panel'); if (!panel) return;
   if (leadTab==='pending') renderPendingTable(panel);
   else if (leadTab==='approved') renderApprovedTable(panel);
-  else renderInterestsTable(panel);
+  else if (leadTab==='interests') renderInterestsTable(panel);
+  else renderSwipeTable(panel);
 }
 
 function pName(id) { return CONFIG.projects.find(p=>p.id===id)?.name||id||'—'; }
@@ -1111,12 +1171,113 @@ function showCopyToast(msg) {
   toast._t = setTimeout(() => { toast.style.opacity = '0'; }, 2000);
 }
 
+// ── SWIPE ACCESS ──────────────────────────────────────────────────────────────
+async function renderSwipeSection() {
+  const el = document.getElementById('swipe-section');
+  if (!el) return;
+  const email = myRecord?.email || sessionEmail;
+  let status = null;
+  if (email) {
+    try {
+      const q = query(collection(db,'swipeRequests'), where('email','==',email));
+      const snap = await getDocs(q);
+      if (!snap.empty) status = snap.docs[0].data().status || 'pending';
+    } catch(e) {}
+  }
+  if (!status) {
+    el.innerHTML = `<button class="btn secondary" style="margin-top:4px;" onclick="openSwipeModal()">Request swipe access</button>`;
+  } else if (status === 'pending') {
+    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--amber);background:var(--amber-light);border:1px solid var(--amber-border);padding:6px 14px;border-radius:8px;">Swipe access request pending</span>`;
+  } else if (status === 'granted') {
+    el.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--green);background:var(--green-light);border:1px solid var(--green-border);padding:6px 14px;border-radius:8px;">Swipe Access Granted</span>`;
+  }
+}
+
+window.openSwipeModal = function() {
+  document.getElementById('swipe-name').value = myRecord?.name || '';
+  document.getElementById('swipe-email').value = myRecord?.email || sessionEmail || '';
+  document.getElementById('swipe-e-name').classList.remove('show');
+  document.getElementById('swipe-e-email').classList.remove('show');
+  document.getElementById('swipe-e-project').classList.remove('show');
+  document.getElementById('swipe-e-reason').classList.remove('show');
+  document.getElementById('swipe-modal').classList.add('open');
+};
+window.closeSwipeModal = function() { document.getElementById('swipe-modal').classList.remove('open'); };
+document.getElementById('swipe-modal').addEventListener('click', e => { if(e.target===document.getElementById('swipe-modal')) closeSwipeModal(); });
+
+window.submitSwipeRequest = async function() {
+  const name = document.getElementById('swipe-name').value.trim();
+  const email = document.getElementById('swipe-email').value.trim();
+  const project = document.getElementById('swipe-project').value;
+  const reason = document.getElementById('swipe-reason').value.trim();
+  let valid = true;
+  const chk = (id,cond) => { const el=document.getElementById(id); if(!cond){el.classList.add('show');valid=false;}else el.classList.remove('show'); };
+  chk('swipe-e-name', name);
+  chk('swipe-e-email', email && email.includes('@'));
+  chk('swipe-e-project', project);
+  chk('swipe-e-reason', reason);
+  if (!valid) return;
+  try {
+    await addDoc(collection(db,'swipeRequests'), { name, email, project, reason, status:'pending', emailSent:false, accessGranted:false, submittedAt:Date.now() });
+    closeSwipeModal();
+    renderSwipeSection();
+  } catch(e) { alert('Something went wrong. Please try again.'); }
+};
+
 window.deleteInterest = async function(id, projectId) {
   if (!confirm('Remove this person from the project? This cannot be undone.')) return;
   try {
     await deleteDoc(doc(db,'projectInterest',id));
     renderInterestsTable(document.getElementById('lead-panel'));
   } catch(e) { alert('Error removing.'); }
+};
+
+async function renderSwipeTable(panel) {
+  panel.innerHTML = `<div class="loading">Loading swipe requests...</div>`;
+  try {
+    const snap = await getDocs(collection(db,'swipeRequests'));
+    const requests = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if (!requests.length) { panel.innerHTML=`<div class="tracker-wrap"><div class="loading">No swipe access requests yet.</div></div>`; return; }
+    const rows = requests.map(r=>`
+      <tr>
+        <td><div class="member-name">${r.name}</div><div class="member-meta">${r.email}</div></td>
+        <td style="font-size:12px;">${r.project||'—'}</td>
+        <td style="font-size:12px;color:var(--text-secondary);max-width:200px;">${r.reason||'—'}</td>
+        <td style="font-size:11px;color:var(--text-muted);font-family:var(--mono);">${new Date(r.submittedAt).toLocaleDateString()}</td>
+        <td>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;">
+              <input type="checkbox" ${r.emailSent?'checked':''} onchange="updateSwipe('${r.id}','emailSent',this.checked)" style="accent-color:var(--accent);"> Email sent
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;">
+              <input type="checkbox" ${r.accessGranted?'checked':''} onchange="updateSwipe('${r.id}','accessGranted',this.checked)" style="accent-color:var(--green);"> Access granted
+            </label>
+          </div>
+        </td>
+        <td>
+          <span class="status-pill ${r.accessGranted?'complete':r.emailSent?'inprogress':'notstarted'}">
+            ${r.accessGranted?'Granted':r.emailSent?'Email sent':'Pending'}
+          </span>
+        </td>
+      </tr>`).join('');
+    panel.innerHTML = `
+      <div class="tracker-wrap">
+        <div class="tracker-header"><span class="tracker-title">${requests.length} swipe request${requests.length!==1?'s':''}</span></div>
+        <table class="tracker-table">
+          <thead><tr><th>Member</th><th>Project</th><th>Reason</th><th>Submitted</th><th>Actions</th><th>Status</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  } catch(e) { panel.innerHTML=`<div class="loading">Error loading requests.</div>`; }
+}
+
+window.updateSwipe = async function(id, field, value) {
+  try {
+    const updateData = { [field]: value };
+    if (field === 'accessGranted' && value) updateData.status = 'granted';
+    else if (field === 'accessGranted' && !value) updateData.status = 'pending';
+    await updateDoc(doc(db,'swipeRequests',id), updateData);
+  } catch(e) { alert('Error updating.'); }
 };
 
 window.approveMember = async function(id,email,name) {
